@@ -118,37 +118,19 @@ Once the project is ready for production, an easy way to create an executable
 is to use [pyinstaller].
 
 1.  Exit a virtual environment if in one (run `deactivate`).
-2.  Install `pyinstaller` with
+2.  Install `py2exe` with
 
     ```sh
-    pip3 install pyinstaller
+    pip3 install py2exe
     ```
 
 3.  Enter the virtual environment (run `source .env/bin/activate` or OS/shell
     equivalent).
-4.  Run `pyinstaller` to create a single binary file
+4.  Run the following command to create a binary file in src/tempgen/dist
 
     ```sh
-    pyinstaller <path_to_package>/__main__.py --onefile -n <exe_name>
+    python setup.py py2exe -p lxml
     ```
-
-    The above command will package the program in the `__main__.py` file into a
-    single executable file and place it in `dist/<exe_name>`. The `<exe_name>`
-    is specified because otherwise it is called `__main__`, which isn't too
-    useful.
-
-    For the example project, something like this
-
-    ```sh
-    pyinstaller src/tempgen/__main__.py --onefile -n tempgen
-    ```
-
-    can be used to create `dist/tempgen`. Now the `tempgen` executable can be placed
-    anywhere on the system and executed as it is completely self contained.
-
-**Note**: The `pyinstaller` does not cross-compile, so the produced executable
-can only run on operating systems similar to the one that built it. This means
-that an executable built on Linux will not run on Windows and vice versa.
 
 
 

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
 import json
 import tkinter.filedialog
 import tkinter.font
 import tkinter as tk
-from utils.scrollableFrame import ScrollableFrame
+from scrollableFrame import ScrollableFrame
 import re
-from utils.num2t4ru import decimal2text
+from num2t4ru import decimal2text
 from datetime import datetime
 import i18n
 import parsers.docx
@@ -17,7 +18,12 @@ availableParsers = {
     '.xlsx': parsers.xlsx,
 }
 
-LOCALES_PATH=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locales')
+try:
+    approot = os.path.dirname(os.path.abspath(__file__))
+except NameError:  # We are the main py2exe script, not a module
+    approot = os.path.dirname(sys.executable)
+
+LOCALES_PATH=os.path.join(approot, 'locales')
 DEFAULT_TEMPLATE_FILENAME = 'template'
 TRANSFORMS = {
     'num2text': lambda x: decimal2text(x,

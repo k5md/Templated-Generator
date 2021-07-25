@@ -1,4 +1,8 @@
-def replace(p, d):
+import sys
+import re
+import docx
+
+def replace_in_paragraph(p, d):
     for replaced, replacement in d.items():
         paragraph_replace_text(p, replaced, replacement)
 
@@ -55,3 +59,33 @@ def paragraph_replace_text(paragraph, str, replace_str):
     #         r = run._r
     #         r.getparent().remove(r)
     return paragraph
+
+def parse(path, container, parseEntry):
+    doc = docx.Document(path)
+    for p in doc.paragraphs:
+        matches = re.findall(r'{{.+?}}', p.text)
+        for match in matches:
+            payload = parseEntry(match)
+            container[payload['id']] = payload ## add check here for duplicates
+    for table in doc.tables:
+        for col in table.columns:
+            for cell in col.cells:
+                for p in cell.paragraphs:
+                    matches = re.findall(r'{{.+?}}', p.text)
+                    for match in matches:
+                        payload = parseEntry(match)
+                        container[payload['id']] = payload ## add check here for duplicates
+
+def replace(sourcePath, targetPath, computeMatch):
+    doc = docx.Document(sourcePath)
+    to_replace = {}
+    for p in doc.paragraphs:
+        computeMatch(p.text, to_replace)
+        replace_in_paragraph(p, to_replace)
+    for table in doc.tables:
+        for col in table.columns:
+            for cell in col.cells:
+                for p in cell.paragraphs:
+                    computeMatch(p.text, to_replace)
+                    replace_in_paragraph(p, to_replace)
+    doc.save(targetPath)

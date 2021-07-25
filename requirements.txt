@@ -1,10 +1,7 @@
 python-docx
-pyexcel
-pyexcel-xlsx
-pyexcel-xls
-pyexcel-ods
 xlrd
 xlwt
 xlutils
 python-i18n
 python-i18n[YAML]
+py2exe

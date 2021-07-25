@@ -1,18 +1,27 @@
 import os
 import re
-import pyexcel
 from zipfile import ZipFile, ZIP_DEFLATED
 import xml.etree.ElementTree as ET
 import shutil
 
 def parse(path, container, parseEntry):
-  sheet = pyexcel.get_sheet(file_name=path)
-  for row in sheet:
-      for cell in row:
-          matches = re.findall(r'{{.+?}}', str(cell))
-          for match in matches:
-              payload = parseEntry(match)
-              container[payload['id']] = payload ## add check here for duplicates
+    tempPath = path + '_temp'
+    with ZipFile(path, 'r') as zipObj:
+        listOfFileNames = zipObj.namelist()
+        for fileName in listOfFileNames:
+            zipObj.extract(fileName, tempPath)
+        
+    ET.register_namespace('','http://schemas.openxmlformats.org/spreadsheetml/2006/main')
+    tree = ET.parse('\\'.join([tempPath, 'xl', 'sharedStrings.xml']))
+    root = tree.getroot()
+    for si in root:
+        for t in si:
+            text = t.text
+            matches = re.findall(r'{{.+?}}', str(text))
+            for match in matches:
+                payload = parseEntry(match)
+                container[payload['id']] = payload ## add check here for duplicates
+    shutil.rmtree(tempPath)
 
 def replace(sourcePath, targetPath, computeMatch):
     tempPath = sourcePath + '_temp'
