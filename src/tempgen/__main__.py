@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 import os
-import re
-import docx
-import pyexcel
 import json
 import tkinter.filedialog
 import tkinter.font
 import tkinter as tk
 from utils.scrollableFrame import ScrollableFrame
-from utils.docx_replace import replace
+import re
 from utils.num2t4ru import decimal2text
-from zipfile import ZipFile, ZIP_DEFLATED
-import xml.etree.ElementTree as ET
 from datetime import datetime
-import shutil
 import i18n
+import parsers.docx
+import parsers.xlsx
 
+availableParsers = {
+    '.docx': parsers.docx,
+    '.xlsx': parsers.xlsx,
+}
 
 LOCALES_PATH=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locales')
 DEFAULT_TEMPLATE_FILENAME = 'template'
@@ -150,71 +150,20 @@ class App(tk.Tk):
     def saveResults(self):
         for template in self._templates:
             name, ext = os.path.splitext(template['path'])
-            if ext in ['.docx']:
-                doc = docx.Document(template['path'])
-                to_replace = {}
-                for p in doc.paragraphs:
-                    self.computeMatch(p.text, to_replace)
-                    replace(p, to_replace)
-                for table in doc.tables:
-                    for col in table.columns:
-                        for cell in col.cells:
-                            for p in cell.paragraphs:
-                                self.computeMatch(p.text, to_replace)
-                                replace(p, to_replace)
-                doc.save(self.saveFileStringVar.get() + ext)
-            
-            if ext in ['.xlsx']:
-                with ZipFile(template['path'], 'r') as zipObj:
-                    listOfFileNames = zipObj.namelist()
-                    for fileName in listOfFileNames:
-                        zipObj.extract(fileName, template['path'] + '_temp')
-                    
-                ET.register_namespace('','http://schemas.openxmlformats.org/spreadsheetml/2006/main')
-                tree = ET.parse('\\'.join([template['path'] + '_temp', 'xl', 'sharedStrings.xml']))
-                root = tree.getroot()
-                for si in root:
-                    for t in si:
-                        text = t.text
-                        local_to_replace = self.computeMatch(t.text, {})
-                        for match, value in local_to_replace.items():
-                            text = text.replace(match, value)
-                        t.text = text
-                tree.write('\\'.join([template['path'] + '_temp', 'xl', 'sharedStrings.xml']))
-                zipf = ZipFile(self.saveFileStringVar.get() + ext, 'w', ZIP_DEFLATED)
-                for folderName, subfolders, filenames in os.walk(template['path'] + '_temp'):
-                    for filename in filenames:
-                        filepath = os.path.join(folderName, filename)
-                        zipf.write(filepath, arcname='\\'.join(filepath.split('\\')[1:]))
-                zipf.close()
-                shutil.rmtree(template['path'] + '_temp')
+
+            if not (ext in availableParsers.keys()):
+                return
+            availableParsers[ext].replace(
+                template['path'],
+                self.saveFileStringVar.get() + ext,
+                self.computeMatch
+            )
 
     def processTemplate(self, template):
         name, ext = os.path.splitext(template['path'])
-        if ext in ['.doc', '.docx']:
-            doc = docx.Document(template['path'])
-            for p in doc.paragraphs:
-                matches = re.findall(r'{{.+?}}', p.text)
-                for match in matches:
-                    payload = self.parseEntry(match)
-                    self._fields[payload['id']] = payload ## add check here for duplicates
-            for table in doc.tables:
-                for col in table.columns:
-                    for cell in col.cells:
-                        for p in cell.paragraphs:
-                            matches = re.findall(r'{{.+?}}', p.text)
-                            for match in matches:
-                                payload = self.parseEntry(match)
-                                self._fields[payload['id']] = payload ## add check here for duplicates
-        
-        if ext in ['.xls', '.xlsx', '.ods']:
-            sheet = pyexcel.get_sheet(file_name=template['path'])
-            for row in sheet:
-                for cell in row:
-                    matches = re.findall(r'{{.+?}}', str(cell))
-                    for match in matches:
-                        payload = self.parseEntry(match)
-                        self._fields[payload['id']] = payload ## add check here for duplicates
+        if not (ext in availableParsers.keys()):
+            return
+        availableParsers[ext].parse(template['path'], self._fields, self.parseEntry)
         
         for child in self.scrollableFrame.frame.winfo_children():
             child.destroy()
