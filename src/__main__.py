@@ -15,6 +15,7 @@ import parsers.xlsx
 import locale
 import time
 import calendar
+from tkinter.messagebox import askyesno
 
 availableParsers = {
     '.docx': parsers.docx,
@@ -75,20 +76,24 @@ class App(tk.Tk):
         self.templateFrame = tk.Frame(self.controlsFrame)
         self.loadTemplateBtn = tk.Button(self.templateFrame, text = i18n.t('translate.loadTemplate'), command = self.loadTemplate)
         self.clearTemplatesBtn = tk.Button(self.templateFrame, text = i18n.t('translate.clearTemplates'), command = self.clearTemplates)
+        self.templatesTextBoxLabel = tk.Label(self.templateFrame, text=i18n.t('translate.loadedTemplates'))
         self.templatesTextBox = tk.Text(self.templateFrame, wrap='word', height=1, background="gray")
 
         self.saveFrame = tk.Frame(self.controlsFrame)
+        self.saveResultsBtn = tk.Button(self.saveFrame, text = i18n.t('translate.saveResults'), command = self.saveResults)
+        self.saveFileLabel = tk.Label(self.saveFrame, text=i18n.t('translate.saveName'))
         self.saveFileStringVar = tk.StringVar()
         self.saveFileEntry = tk.Entry(self.saveFrame, textvariable=self.saveFileStringVar)
-        self.saveResultsBtn = tk.Button(self.saveFrame, text = i18n.t('translate.saveResults'), command = self.saveResults)
         
         self.saveFrame.pack(side=tk.TOP, fill="x", padx=5, pady=5)
+        self.saveFileLabel.pack(side=tk.LEFT, fill="x")
+        self.saveFileEntry.pack(side=tk.LEFT, fill="x", expand=True, padx=(0, 5))
         self.saveResultsBtn.pack(side=tk.LEFT, fill="x", padx=(0, 5))
-        self.saveFileEntry.pack(side=tk.RIGHT, fill="x", expand=True, padx=(0, 5))
 
+        self.templatesTextBoxLabel.pack(side=tk.LEFT, fill="x")
+        self.templatesTextBox.pack(side=tk.LEFT, fill="x", expand=True, padx=(0, 5))
         self.loadTemplateBtn.pack(side=tk.LEFT, fill="x", padx=(0, 5))
         self.clearTemplatesBtn.pack(side=tk.LEFT, fill="x", padx=(0, 5))
-        self.templatesTextBox.pack(side=tk.RIGHT, fill="x", expand=True, padx=(0, 5))
         self.templateFrame.pack(side=tk.TOP, fill="x", padx=5, pady=5)
 
         # WINDOW CONFIG
@@ -152,7 +157,6 @@ class App(tk.Tk):
             if payload['getter'] in TRANSFORMS:
                 value = TRANSFORMS[payload['getter']](payload['default'])
                 payload['default'] = str(value)
-            #print(payload)
         return payload
 
     def computeMatch(self, text, to_replace): # find matches, populate to_replace, return to_replace
@@ -171,9 +175,17 @@ class App(tk.Tk):
         return to_replace
 
     def saveResults(self):
+        generatedFiles = [self.saveFileStringVar.get() + os.path.splitext(template['path'])[1] for template in self._templates]
+        filesInDirectory = [path for path in os.listdir(approot) if os.path.isfile(path)]
+        for generatedFile in generatedFiles:
+            if generatedFile in filesInDirectory:
+                proceed = askyesno(title=i18n.t('translate.replaceTitle'), message=i18n.t('translate.replaceMessage'))
+                if not proceed:
+                    return
+                break
+
         for template in self._templates:
             name, ext = os.path.splitext(template['path'])
-
             if not (ext in availableParsers.keys()):
                 return
             availableParsers[ext].replace(

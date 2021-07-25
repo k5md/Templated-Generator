@@ -1,5 +1,5 @@
 from distutils.core import setup
-import py2exe, sys, os, decimal, json, tkinter.filedialog, tkinter.font, tkinter as tk, scrollableFrame, re, num2t4ru, datetime, i18n, parsers.docx, parsers.xlsx
+import py2exe, sys, os, decimal, json, tkinter.filedialog, tkinter.font, tkinter.messagebox, tkinter as tk, scrollableFrame, re, num2t4ru, datetime, i18n, parsers.docx, parsers.xlsx
 import lxml._elementpath
 import glob
 import shutil
