@@ -12,6 +12,9 @@ from datetime import datetime
 import i18n
 import parsers.docx
 import parsers.xlsx
+import locale
+import time
+import calendar
 
 availableParsers = {
     '.docx': parsers.docx,
@@ -23,6 +26,12 @@ try:
 except NameError:  # We are the main py2exe script, not a module
     approot = os.path.dirname(sys.executable)
 
+
+def ru_dmy():
+    month_names = ['', 'января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
+    now = datetime.today()
+    return ' '.join([str(x) for x in [now.day, month_names[now.month], now.year]]) + 'г.'
+
 LOCALES_PATH=os.path.join(approot, 'locales')
 DEFAULT_TEMPLATE_FILENAME = 'template'
 TRANSFORMS = {
@@ -30,6 +39,8 @@ TRANSFORMS = {
         int_units=((u'рубль', u'рубля', u'рублей'), 'm'),
         exp_units=((u'копейка', u'копейки', u'копеек'), 'f')
     ).capitalize(),
+    'inverted_date': lambda x: datetime.today().strftime('%Y%m%d')[2:],
+    'ru_dmy': lambda x: ru_dmy()
 }
 
 def has(arr , key, value):
@@ -91,12 +102,13 @@ class App(tk.Tk):
         self._fields = {} # key - id, value - { id, title, __stringVar, __entry }
 
         self._templates = [] # value - { path }
-        self._templates = [{'path': path } for path in os.listdir() if os.path.isfile(path) and DEFAULT_TEMPLATE_FILENAME in path]
+        
+        self._templates = [{'path': os.path.abspath(path) } for path in os.listdir(approot) if os.path.isfile(path) and DEFAULT_TEMPLATE_FILENAME in path]
         for template in self._templates:
             self.loadTemplate(template)
 
         date=datetime.today().strftime('%Y%m%d')
-        rendered = date[2:4] + date[4:]
+        rendered = date[2:]
         self.saveFileStringVar.set(rendered + ' ')
 
     def loadTemplate(self, providedTemplate = None):
@@ -133,9 +145,14 @@ class App(tk.Tk):
             pairs = [pair.strip() for pair in entry.split(',')]
             for pair in pairs:
                 key, value = pair.split(':')
-                key = key.replace(r'(^[^a-zA-Z0-9А-Яа-я]|[^a-zA-Z0-9А-Яа-я]$)', '')
-                value = value.replace(r'(^[^a-zA-Z0-9А-Яа-я]|[^a-zA-Z0-9А-Яа-я]$)', '')
-                payload[key.strip('"')] = value
+                key = key.strip()[1:-1]
+                value = value.strip()[1:-1]
+                payload[key] = value
+        if 'getter' in payload:
+            if payload['getter'] in TRANSFORMS:
+                value = TRANSFORMS[payload['getter']](payload['default'])
+                payload['default'] = str(value)
+            #print(payload)
         return payload
 
     def computeMatch(self, text, to_replace): # find matches, populate to_replace, return to_replace
@@ -164,6 +181,16 @@ class App(tk.Tk):
                 self.saveFileStringVar.get() + ext,
                 self.computeMatch
             )
+    
+    def renderEntry(self, key, value):
+        container = tk.Frame(self.scrollableFrame.frame)
+        container.pack(side=tk.TOP, fill='both', expand=True)
+        label = tk.Label(container, text=value['title'] if 'title' in value else key)
+        label.pack(side=tk.LEFT)
+        self._fields[key]['__stringVar'] = tk.StringVar()
+        self._fields[key]['__stringVar'].set(value['default'] if 'default' in value else '')
+        self._fields[key]['__entry'] = tk.Entry(container, textvariable=self._fields[key]['__stringVar'])
+        self._fields[key]['__entry'].pack(side=tk.RIGHT, fill="x", expand=True)
 
     def processTemplate(self, template):
         name, ext = os.path.splitext(template['path'])
@@ -174,16 +201,16 @@ class App(tk.Tk):
         for child in self.scrollableFrame.frame.winfo_children():
             child.destroy()
 
-        for key, value in self._fields.items():
-            container = tk.Frame(self.scrollableFrame.frame)
-            container.pack(side=tk.TOP, fill='both', expand=True)
-            label = tk.Label(container, text=value['title'] if 'title' in value else key)
-            label.pack(side=tk.LEFT)
-            self._fields[key]['__stringVar'] = tk.StringVar()
-            self._fields[key]['__stringVar'].set(value['default'] if 'default' in value else '')
-            self._fields[key]['__entry'] = tk.Entry(container, textvariable=self._fields[key]['__stringVar'])
-            self._fields[key]['__entry'].pack(side=tk.RIGHT, fill="x", expand=True)
-            
+        entries = list(self._fields.items())
+        entries.sort(key=lambda x : x[1].get('primary', 'ZZZZZ') + x[1]['title'])
+        primary = [x for x in entries if x[1].get('primary')]
+        secondary  = [x for x in entries if not x[1].get('primary')]
+        for key, value in primary:
+            self.renderEntry(key, value)
+        separator = tk.ttk.Separator(self.scrollableFrame.frame, orient='horizontal')
+        separator.pack(fill='x', pady=10)
+        for key, value in secondary:
+            self.renderEntry(key, value)
 
 if __name__ == "__main__":
     app = App()

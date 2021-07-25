@@ -25,6 +25,7 @@ def parse(path, container, parseEntry):
 
 def replace(sourcePath, targetPath, computeMatch):
     tempPath = sourcePath + '_temp'
+    lastPortion = tempPath.split('\\')[-1] # relative path for zipf arcname construction
     with ZipFile(sourcePath, 'r') as zipObj:
         listOfFileNames = zipObj.namelist()
         for fileName in listOfFileNames:
@@ -40,11 +41,13 @@ def replace(sourcePath, targetPath, computeMatch):
             for match, value in local_to_replace.items():
                 text = text.replace(match, value)
             t.text = text
-    tree.write('\\'.join([tempPath, 'xl', 'sharedStrings.xml']))
+    tree.write(os.path.join(tempPath, 'xl', 'sharedStrings.xml'))
     zipf = ZipFile(targetPath, 'w', ZIP_DEFLATED)
     for folderName, subfolders, filenames in os.walk(tempPath):
         for filename in filenames:
             filepath = os.path.join(folderName, filename)
-            zipf.write(filepath, arcname='\\'.join(filepath.split('\\')[1:]))
+            segments = filepath.split(os.sep)
+            archivePath = segments[segments.index(lastPortion):]
+            zipf.write(filepath, arcname=os.sep.join(archivePath[1:]))
     zipf.close()
     shutil.rmtree(tempPath)
