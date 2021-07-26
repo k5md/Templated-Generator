@@ -20,8 +20,9 @@ def find_data_files(source,target,patterns):
 setup(
     options = {
       py2exe: {
-        'includes': ['lxml._elementpath'],
+        'includes': ['lxml._elementpath', 'tkinter', 'tkinter.filedialog', 'tkinter.font', 'tkinter.messagebox'],
         #'data_files': find_data_files('locales','',[ 'locales/*']), # does not work
+        "bundle_files": 0
       }
     },
     windows = [{'script': '__main__.py'}],
