@@ -16,6 +16,8 @@ import locale
 import time
 import calendar
 from tkinter.messagebox import askyesno
+import itertools
+import operator
 
 availableParsers = {
     '.docx': parsers.docx,
@@ -48,6 +50,12 @@ def has(arr , key, value):
     for x in arr:
         if x[key] == value:
             return True
+
+def split_by_property_presense(array, property):
+    present, missing = [], []
+    for item in array:
+        present.append(item) if property in item else missing.append(item)
+    return present, missing  
 
 class App(tk.Tk):
     def __init__(self):
@@ -128,6 +136,7 @@ class App(tk.Tk):
             template = providedTemplate
         
         self.processTemplate(template)
+        self.renderEntries()
         self.templatesTextBox.delete(1.0, "end")
         self.templatesTextBox.insert("1.0", ','.join(t['path'] for t in self._templates))
     
@@ -204,25 +213,44 @@ class App(tk.Tk):
         self._fields[key]['__entry'] = tk.Entry(container, textvariable=self._fields[key]['__stringVar'])
         self._fields[key]['__entry'].pack(side=tk.RIGHT, fill="x", expand=True)
 
+    def renderEntries(self):
+        for child in self.scrollableFrame.frame.winfo_children():
+            child.destroy()
+
+        # split fields by presense 'group' property into group_specified and group_not_specified
+        group_specified, group_not_specified = split_by_property_presense(self._fields.values(), 'group')
+        # sort fields with no 'group' specified by 'title' property
+        group_not_specified_sorted = sorted(group_not_specified, key=lambda i: i['title'])
+        # group fields with 'group' specified by 'group' property value
+        group_specified_dict = { p: list(g) for p, g in itertools.groupby(group_specified, lambda i: i['group']) }
+
+        # sort each group entries by entry 'order' property, entries with missing 'order' property are sorted by title
+        # and place in the end
+        group_specified_dict_items_sorted = {}
+        for group, entries in group_specified_dict.items():
+            order_specified, order_not_specified = split_by_property_presense(entries, 'order')
+            order_not_specified = sorted(order_not_specified, key=lambda i: i['title'])
+            order_specified = sorted(order_specified, key=lambda i: int(i['order']))
+            group_specified_dict_items_sorted[group] = order_specified + order_not_specified
+
+        # group_specified_dict_items_sorted -> array of entries, entries groups are sorted by group name
+        group_specified = [v for k, v in sorted(group_specified_dict_items_sorted.items(), key=lambda e: e[0])]
+
+        for group in group_specified:
+            for value in group:
+                self.renderEntry(value['id'], value)
+            separator = tk.ttk.Separator(self.scrollableFrame.frame, orient='horizontal')
+            separator.pack(fill='x', pady=10)
+        for value in group_not_specified_sorted:
+            self.renderEntry(value['id'], value)
+
     def processTemplate(self, template):
         name, ext = os.path.splitext(template['path'])
         if not (ext in availableParsers.keys()):
             return
         availableParsers[ext].parse(template['path'], self._fields, self.parseEntry)
         
-        for child in self.scrollableFrame.frame.winfo_children():
-            child.destroy()
-
-        entries = list(self._fields.items())
-        entries.sort(key=lambda x : x[1].get('primary', 'ZZZZZ') + x[1]['title'])
-        primary = [x for x in entries if x[1].get('primary')]
-        secondary  = [x for x in entries if not x[1].get('primary')]
-        for key, value in primary:
-            self.renderEntry(key, value)
-        separator = tk.ttk.Separator(self.scrollableFrame.frame, orient='horizontal')
-        separator.pack(fill='x', pady=10)
-        for key, value in secondary:
-            self.renderEntry(key, value)
+        
 
 if __name__ == "__main__":
     app = App()
