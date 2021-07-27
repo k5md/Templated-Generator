@@ -1,10 +1,13 @@
 ru:
-  fieldsTitle: Форма
-  controlsTitle: Действия
-  loadTemplate: Загрузить шаблон
-  clearTemplates: Очистить
-  saveResults: Сохранить
+  fieldsTitle: 'Форма'
+  controlsTitle: 'Действия'
+  loadTemplate: 'Загрузить шаблон'
+  clearTemplates: 'Очистить'
+  saveResults: 'Сохранить'
   saveName: 'Имя файла:'
   loadedTemplates: 'Загруженные шаблоны:'
   replaceTitle: 'Подтверждение'
   replaceMessage: 'Один или несколько файлов с указанным именем уже сгенерированы, хотите продолжить и заменить данные файлы?'
+  settings: 'Настройки'
+  rewriteTemplates: 'Перезаписывать шаблоны'
+  rewriteExternals: 'Перезаписывать внешние источники'

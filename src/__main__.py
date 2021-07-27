@@ -18,6 +18,7 @@ import calendar
 from tkinter.messagebox import askyesno
 import itertools
 import operator
+from autocompleteEntry import AutocompleteEntry
 
 availableParsers = {
     '.docx': parsers.docx,
@@ -67,7 +68,7 @@ class App(tk.Tk):
         ### FRAMES
         self.rootFrame = tk.Frame(self)
         default_font = tkinter.font.nametofont("TkDefaultFont")
-        default_font.configure(size=12)
+        default_font.configure(size=10)
         self.rootFrame.option_add("*Font", default_font)
         self.fieldsFrame = tk.LabelFrame(self.rootFrame, text=i18n.t('translate.fieldsTitle'))
         self.controlsFrame = tk.LabelFrame(self.rootFrame, text=i18n.t('translate.controlsTitle'))
@@ -104,7 +105,25 @@ class App(tk.Tk):
         self.clearTemplatesBtn.pack(side=tk.LEFT, fill="x", padx=(0, 5))
         self.templateFrame.pack(side=tk.TOP, fill="x", padx=5, pady=5)
 
+        lista = ['a', 'actions', 'additional', 'also', 'an', 'and', 'angle', 'are', 'as', 'be', 'bind', 'bracket', 'brackets', 'button', 'can', 'cases', 'configure', 'course', 'detail', 'enter', 'event', 'events', 'example', 'field', 'fields', 'for', 'give', 'important', 'in', 'information', 'is', 'it', 'just', 'key', 'keyboard', 'kind', 'leave', 'left', 'like', 'manager', 'many', 'match', 'modifier', 'most', 'of', 'or', 'others', 'out', 'part', 'simplify', 'space', 'specifier', 'specifies', 'string;', 'that', 'the', 'there', 'to', 'type', 'unless', 'use', 'used', 'user', 'various', 'ways', 'we', 'window', 'wish', 'you']
+        entry = AutocompleteEntry(self.rootFrame, self, lista)
+        entry.pack(fill=tk.X, expand=True)
+
+        # MENU BAR
+
+        self.menuBar = tk.Menu(self)
+
+        self.settingsMenu = tk.Menu(self.menuBar, tearoff=0)
+
+        self.rewriteTemplates = tk.BooleanVar(value=True)
+        self.rewriteExternals = tk.BooleanVar(value=True)
+        self.settingsMenu.add_checkbutton(label=i18n.t('translate.rewriteTemplates'), onvalue=True, offvalue=False, variable=self.rewriteTemplates)
+        self.settingsMenu.add_checkbutton(label=i18n.t('translate.rewriteExternals'), onvalue=True, offvalue=False, variable=self.rewriteExternals)
+
+        self.menuBar.add_cascade(label=i18n.t('translate.settings'), menu=self.settingsMenu)
+
         # WINDOW CONFIG
+        self.config(menu=self.menuBar)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.update_idletasks()
@@ -205,7 +224,7 @@ class App(tk.Tk):
     
     def renderEntry(self, key, value):
         container = tk.Frame(self.scrollableFrame.frame)
-        container.pack(side=tk.TOP, fill='both', expand=True)
+        container.pack(side=tk.TOP, fill='both', expand=True, padx=5)
         label = tk.Label(container, text=value['title'] if 'title' in value else key)
         label.pack(side=tk.LEFT)
         self._fields[key]['__stringVar'] = tk.StringVar()
@@ -249,8 +268,6 @@ class App(tk.Tk):
         if not (ext in availableParsers.keys()):
             return
         availableParsers[ext].parse(template['path'], self._fields, self.parseEntry)
-        
-        
 
 if __name__ == "__main__":
     app = App()
