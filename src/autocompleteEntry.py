@@ -5,6 +5,8 @@ from tkinter import ttk
 import re
 import math
 
+MAX_LINES = 16
+
 class AutocompleteEntry(ttk.Frame):
     def __init__(self, container, suggestions, *args, **kwargs):
         super().__init__(container, *args, **kwargs)  
@@ -22,6 +24,8 @@ class AutocompleteEntry(ttk.Frame):
         self.bind("<Up>", self.up)
         self.bind("<Down>", self.down)
         self.bind("<Configure>", self.configure)
+        self.bind('<FocusIn>', lambda _: self.changed())
+        self.bind('<FocusOut>', lambda _: self.destroyListBox())
 
     def createListBox(self):
         # frame used to place bounding frame arbitrarily
@@ -33,14 +37,9 @@ class AutocompleteEntry(ttk.Frame):
         # frame containing scrollable listbox
         self.listBoxScrollbarFrame = tk.Frame(self.listBoxBoundingFrame)
 
-        #self.scrollbar = tk.Scrollbar(self.listBoxScrollbarFrame, orient="vertical")
-        #self.lb = tk.Listbox(self.listBoxScrollbarFrame, yscrollcommand=self.scrollbar.set)
         self.lb = tk.Listbox(self.listBoxScrollbarFrame)
-        #self.scrollbar.config(command=self.lb.yview)
         self.lb.bind("<Double-Button-1>", self.selection)
         self.lb.bind("<Right>", self.selection)
-        #self.scrollbar.pack(side="right", fill="y")
-        #self.lb.pack(side="left",fill="both", expand=True)
 
         self.lb_up = True
     
@@ -56,22 +55,13 @@ class AutocompleteEntry(ttk.Frame):
             return
         x, y, width, height = self.computeListBoxConfig()
 
-        #self.lb.place(in_=self.listBoxScrollbarFrame, relx=0, rely=0)
         self.lb.pack(fill="both", expand=True)
         self.lb.configure(height=math.floor(height / self.min_height))
-        self.lb.update()
 
         self.listBoxScrollbarFrame.place(in_=self.listBoxBoundingFrame, relx=0, rely=0, relheight=1, relwidth=1)
-        #self.listBoxScrollbarFrame.configure(width=width, height=height)
-        self.listBoxScrollbarFrame.update()
-
         self.listBoxBoundingFrame.place(in_=self.listBoxPlacingFrame, relx=0, rely=0, relheight=1, relwidth=1)
-        #self.listBoxBoundingFrame.configure(width=width, height=height)
-        self.listBoxBoundingFrame.update()
-
         self.listBoxPlacingFrame.place(in_=self.container, x=x, y=y)
         self.listBoxPlacingFrame.configure(width=width, height=height)
-        self.listBoxPlacingFrame.update()
 
     def computeListBoxConfig(self):
         # self.max_height must be multiple of self.min_height
@@ -91,21 +81,20 @@ class AutocompleteEntry(ttk.Frame):
             else:
                 height = self.max_height  
             return self.winfo_x(), self.winfo_y() - height, self.winfo_width(), height
-        # place over
-        return self.winfo_x(), self.winfo_y(), self.winfo_width(), self.min_height
 
-    def changed(self, name, index, mode):  
+    def changed(self, *args):  
         if self.var.get() == '' and self.lb_up:
             self.destroyListBox()
             return
         words = self.comparison()
-        if words:            
+        if words:      
             if not self.lb_up:
                 self.createListBox()
-                self.positionListBox()
             self.lb.delete(0, tk.END)
             for w in words:
                 self.lb.insert(tk.END,w)
+            self.max_height = min(self.min_height * MAX_LINES, self.min_height * len(words))
+            self.positionListBox()
         else:
             self.destroyListBox()
         
@@ -147,5 +136,4 @@ class AutocompleteEntry(ttk.Frame):
         # since we can not get text entry, listbox height directly (they yield height in rows), we take this self.winfo_height()
         # and use it to calculate possible height in rows
         self.min_height = self.winfo_height() 
-        self.max_height = self.min_height * 16
         self.positionListBox()
