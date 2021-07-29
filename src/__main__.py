@@ -105,10 +105,6 @@ class App(tk.Tk):
         self.clearTemplatesBtn.pack(side=tk.LEFT, fill="x", padx=(0, 5))
         self.templateFrame.pack(side=tk.TOP, fill="x", padx=5, pady=5)
 
-        lista = ['a', 'actions', 'additional', 'also', 'an', 'and', 'angle', 'are', 'as', 'be', 'bind', 'bracket', 'brackets', 'button', 'can', 'cases', 'configure', 'course', 'detail', 'enter', 'event', 'events', 'example', 'field', 'fields', 'for', 'give', 'important', 'in', 'information', 'is', 'it', 'just', 'key', 'keyboard', 'kind', 'leave', 'left', 'like', 'manager', 'many', 'match', 'modifier', 'most', 'of', 'or', 'others', 'out', 'part', 'simplify', 'space', 'specifier', 'specifies', 'string;', 'that', 'the', 'there', 'to', 'type', 'unless', 'use', 'used', 'user', 'various', 'ways', 'we', 'window', 'wish', 'you']
-        entry = AutocompleteEntry(self.rootFrame, self, lista)
-        entry.pack(fill=tk.X, expand=True)
-
         # MENU BAR
 
         self.menuBar = tk.Menu(self)
@@ -262,6 +258,14 @@ class App(tk.Tk):
             separator.pack(fill='x', pady=10)
         for value in group_not_specified_sorted:
             self.renderEntry(value['id'], value)
+
+        try:
+            self.entry.destroy()
+        except:
+            print('boom')
+        l= ['a', 'actions', 'additional', 'also', 'an', 'and', 'angle', 'are', 'as', 'be', 'bind', 'bracket', 'brackets', 'button', 'can', 'cases', 'configure', 'course', 'detail', 'enter', 'event', 'events', 'example', 'field', 'fields', 'for', 'give', 'important', 'in', 'information', 'is', 'it', 'just', 'key', 'keyboard', 'kind', 'leave', 'left', 'like', 'manager', 'many', 'match', 'modifier', 'most', 'of', 'or', 'others', 'out', 'part', 'simplify', 'space', 'specifier', 'specifies', 'string;', 'that', 'the', 'there', 'to', 'type', 'unless', 'use', 'used', 'user', 'various', 'ways', 'we', 'window', 'wish', 'you']
+        self.entry = AutocompleteEntry(self.rootFrame, l)
+        self.entry.pack(fill=tk.X)
 
     def processTemplate(self, template):
         name, ext = os.path.splitext(template['path'])
