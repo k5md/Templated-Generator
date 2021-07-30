@@ -4,7 +4,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 import xml.etree.ElementTree as ET
 import shutil
 
-def parse(path, container, parseEntry):
+def parse(path, container, parseEntry, findMatches):
     tempPath = path + '_temp'
     with ZipFile(path, 'r') as zipObj:
         listOfFileNames = zipObj.namelist()
@@ -17,7 +17,7 @@ def parse(path, container, parseEntry):
     for si in root:
         for t in si:
             text = t.text
-            matches = re.findall(r'{{.+?}}', str(text))
+            matches = findMatches(str(text))
             for match in matches:
                 payload = parseEntry(match)
                 container[payload['id']] = payload ## add check here for duplicates

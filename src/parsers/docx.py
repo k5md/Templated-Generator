@@ -60,10 +60,10 @@ def paragraph_replace_text(paragraph, str, replace_str):
     #         r.getparent().remove(r)
     return paragraph
 
-def parse(path, container, parseEntry):
+def parse(path, container, parseEntry, findMatches):
     doc = docx.Document(path)
     for p in doc.paragraphs:
-        matches = re.findall(r'{{.+?}}', p.text)
+        matches = findMatches(p.text)
         for match in matches:
             payload = parseEntry(match)
             container[payload['id']] = payload ## add check here for duplicates
@@ -71,7 +71,7 @@ def parse(path, container, parseEntry):
         for col in table.columns:
             for cell in col.cells:
                 for p in cell.paragraphs:
-                    matches = re.findall(r'{{.+?}}', p.text)
+                    matches = findMatches(p.text)
                     for match in matches:
                         payload = parseEntry(match)
                         container[payload['id']] = payload ## add check here for duplicates

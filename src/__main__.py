@@ -56,7 +56,21 @@ def split_by_property_presense(array, property):
     present, missing = [], []
     for item in array:
         present.append(item) if property in item else missing.append(item)
-    return present, missing  
+    return present, missing
+
+import types
+import functools
+
+def copy_func(f):
+    """Based on http://stackoverflow.com/a/6528148/190597 (Glenn Maynard)"""
+    g = types.FunctionType(f.__code__, f.__globals__, name=f.__name__,
+                           argdefs=f.__defaults__,
+                           closure=f.__closure__)
+    g = functools.update_wrapper(g, f)
+    g.__kwdefaults__ = f.__kwdefaults__
+    return g
+
+from functools import partial
 
 class App(tk.Tk):
     def __init__(self):
@@ -161,30 +175,37 @@ class App(tk.Tk):
         self.templatesTextBox.delete(1.0, "end")
         for child in self.scrollableFrame.frame.winfo_children():
             child.destroy()
+    
+    def reloadExternals(self):
+        for entry in self._fields.values():
+            autocomplete = entry.get('autocomplete')
+            if autocomplete:
+                if type(autocomplete) is dict and autocomplete.get('external'):
+                    external = self.loadExternal(autocomplete.get('external'))
+                    self._fields[entry['id']]['autocomplete']['data'] = external
+                    self._fields[entry['id']]['__entry'].suggestions = external
+                    self._fields[entry['id']]['__entry'].update()
 
     def parseEntry(self, string):
-        content = string[1:-1]
-        parsable = re.sub(r'[“”]', '"', content)
+        content = string[2:-2]
         payload = {}
-        try:
-            payload = json.loads(parsable)
-        except:
-            payload = {}
-            entry = parsable.strip('{').strip('}')
-            pairs = [pair.strip() for pair in entry.split(',')]
-            for pair in pairs:
-                key, value = pair.split(':')
-                key = key.strip()[1:-1]
-                value = value.strip()[1:-1]
-                payload[key] = value
+        payload = json.loads(content)
         if 'getter' in payload:
             if payload['getter'] in TRANSFORMS:
-                value = TRANSFORMS[payload['getter']](payload['default'])
-                payload['default'] = str(value)
+                value = TRANSFORMS[payload['getter']](payload['value'])
+                payload['value'] = str(value)
+        autocomplete = payload.get('autocomplete')
+        if autocomplete:
+            if type(autocomplete) is dict and autocomplete.get('external'):
+                external = self.loadExternal(autocomplete.get('external'))
+                payload['autocomplete']['data'] = external
         return payload
+    
+    def findMatches(self, text):
+        return re.findall(r'{{{.+?}}}+', text)
 
     def computeMatch(self, text, to_replace): # find matches, populate to_replace, return to_replace
-        matches = re.findall(r'{{.+?}}', text)
+        matches = self.findMatches(text)
         for match in matches:
             payload = self.parseEntry(match)
             value = self._fields[payload['id']]['__stringVar'].get()
@@ -197,6 +218,34 @@ class App(tk.Tk):
                 value = str(value) + payload['append']
             to_replace[match] = value
         return to_replace
+    
+    def computeUpdatedTemplate(self, text, to_replace): # find matches, populate to_replace, return to_replace
+        matches = self.findMatches(text)
+        for match in matches:
+            payload = self.parseEntry(match)
+            newValue = self._fields[payload['id']]['__stringVar'].get()
+            payload['value'] = newValue
+            if payload.get('autocomplete') and payload.get('autocomplete', {}).get('data'):
+                if newValue not in payload['autocomplete']['data']:
+                    payload['autocomplete']['data'].append(newValue) 
+                    if (self.rewriteExternals.get()):
+                        self.saveExternal(payload['autocomplete']['external'], payload['autocomplete']['data'])
+                        self.reloadExternals()
+                del payload['autocomplete']['data']
+            to_replace[match] = json.dumps(payload, ensure_ascii=False)
+        return to_replace
+
+    def saveTemplates(self):
+        if (self.rewriteTemplates.get()):
+            for template in self._templates:
+                name, ext = os.path.splitext(template['path'])
+                if not (ext in availableParsers.keys()):
+                    return
+                availableParsers[ext].replace(
+                    template['path'],
+                    self.saveFileStringVar.get() + 'updated' + ext,
+                    self.computeUpdatedTemplate
+                )
 
     def saveResults(self):
         generatedFiles = [self.saveFileStringVar.get() + os.path.splitext(template['path'])[1] for template in self._templates]
@@ -217,16 +266,46 @@ class App(tk.Tk):
                 self.saveFileStringVar.get() + ext,
                 self.computeMatch
             )
+        self.saveTemplates()
     
-    def renderEntry(self, key, value):
+    def loadExternal(self, file_name):
+        if file_name in os.listdir(approot) and os.path.isfile(file_name):
+            file_path = os.path.abspath(file_name)
+            with open(file_path, 'r') as file:
+                content = file.read()
+                payload = json.loads(content)
+                return payload
+    
+    def saveExternal(self, file_name, payload):
+        if file_name in os.listdir(approot) and os.path.isfile(file_name):
+            file_path = os.path.abspath(file_name)
+            with open(file_path, 'w') as file:
+                content = json.dumps(payload, ensure_ascii=False)
+                file.write(content)
+    
+    def renderEntry(self, value):
+        id = value['id']
         container = tk.Frame(self.scrollableFrame.frame)
         container.pack(side=tk.TOP, fill='both', expand=True, padx=5)
-        label = tk.Label(container, text=value['title'] if 'title' in value else key)
+        label = tk.Label(container, text=value.get('title', id))
         label.pack(side=tk.LEFT)
-        self._fields[key]['__stringVar'] = tk.StringVar()
-        self._fields[key]['__stringVar'].set(value['default'] if 'default' in value else '')
-        self._fields[key]['__entry'] = tk.Entry(container, textvariable=self._fields[key]['__stringVar'])
-        self._fields[key]['__entry'].pack(side=tk.RIGHT, fill="x", expand=True)
+        self._fields[id]['__stringVar'] = tk.StringVar()
+        self._fields[id]['__stringVar'].set(value.get('value', ''))
+
+        autocomplete_suggestions = self._fields[id].get('autocomplete', {}).get('data')
+        if (autocomplete_suggestions):
+            self._fields[id]['__entry'] = AutocompleteEntry(
+                container, autocomplete_suggestions, textvariable=self._fields[id]['__stringVar'],
+                bounding_container=self.rootFrame
+            )
+            
+            oldOnScroll = copy_func(self.scrollableFrame.onScroll)
+            self.scrollableFrame.onScroll = lambda: (oldOnScroll() and False) or self._fields[id]['__entry'].destroyListBox()
+            #self.scrollableFrame.onScroll = lambda : self.scrollableFrame.oldOnScroll() or self._fields[id]['__entry'].destroyListBox()
+            self._fields[id]['__entry'].pack(fill=tk.X)
+        else:
+            self._fields[id]['__entry'] = tk.Entry(container, textvariable=self._fields[id]['__stringVar'])
+            self._fields[id]['__entry'].pack(side=tk.RIGHT, fill="x", expand=True)
 
     def renderEntries(self):
         for child in self.scrollableFrame.frame.winfo_children():
@@ -253,25 +332,17 @@ class App(tk.Tk):
 
         for group in group_specified:
             for value in group:
-                self.renderEntry(value['id'], value)
+                self.renderEntry(value)
             separator = tk.ttk.Separator(self.scrollableFrame.frame, orient='horizontal')
             separator.pack(fill='x', pady=10)
         for value in group_not_specified_sorted:
-            self.renderEntry(value['id'], value)
-
-        try:
-            self.entry.destroy()
-        except:
-            print('boom')
-        l= ['a', 'actions', 'additional', 'also', 'an', 'and', 'angle', 'are', 'as', 'be', 'bind', 'bracket', 'brackets', 'button', 'can', 'cases', 'configure', 'course', 'detail', 'enter', 'event', 'events', 'example', 'field', 'fields', 'for', 'give', 'important', 'in', 'information', 'is', 'it', 'just', 'key', 'keyboard', 'kind', 'leave', 'left', 'like', 'manager', 'many', 'match', 'modifier', 'most', 'of', 'or', 'others', 'out', 'part', 'simplify', 'space', 'specifier', 'specifies', 'string;', 'that', 'the', 'there', 'to', 'type', 'unless', 'use', 'used', 'user', 'various', 'ways', 'we', 'window', 'wish', 'you']
-        self.entry = AutocompleteEntry(self.rootFrame, l)
-        self.entry.pack(fill=tk.X)
+            self.renderEntry(value)
 
     def processTemplate(self, template):
         name, ext = os.path.splitext(template['path'])
         if not (ext in availableParsers.keys()):
             return
-        availableParsers[ext].parse(template['path'], self._fields, self.parseEntry)
+        availableParsers[ext].parse(template['path'], self._fields, self.parseEntry, self.findMatches)
 
 if __name__ == "__main__":
     app = App()

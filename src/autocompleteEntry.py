@@ -7,15 +7,20 @@ import math
 
 MAX_LINES = 16
 
+def traverseUp(widget, function, initializer = None):
+    return function(widget, traverseUp(widget.master, function, initializer) if hasattr(widget, 'master') else initializer)
+
 class AutocompleteEntry(ttk.Frame):
-    def __init__(self, container, suggestions, *args, **kwargs):
+    def __init__(self, container, suggestions, textvariable=None, bounding_container=None, *args, **kwargs):
         super().__init__(container, *args, **kwargs)  
         self.lb_up = False
+
+        self.bounding_container = bounding_container if bounding_container else self
 
         self.container = container
         self.suggestions = suggestions
 
-        self.var = tk.StringVar()
+        self.var = textvariable if textvariable else tk.StringVar()
         self.var.trace('w', self.changed)
         self.entry = tk.Entry(self, textvariable=self.var)
         self.entry.pack(fill=tk.X, expand=True)
@@ -27,9 +32,36 @@ class AutocompleteEntry(ttk.Frame):
         self.bind('<FocusIn>', lambda _: self.changed())
         self.bind('<FocusOut>', lambda _: self.destroyListBox())
 
+        # traditional FocusIn and FocusOut won't trigger when any of autocompleteEntry masters would be scrolled, so bind to root and check if clicked away from listbox
+        # if not done, listbox would be in bounding container when its contents are scrolled
+        #traverseUp(self.container, lambda widget, _: widget.bind('<Button>', lambda event: self.click_away(event)) if widget and not widget.master else None)
+    
+    def get_mouse_position(self, event):
+        x = traverseUp(event.widget, lambda widget, acc: widget.winfo_x() + acc if widget and widget.master else acc, event.x)
+        y = traverseUp(event.widget, lambda widget, acc: widget.winfo_y() + acc if widget and widget.master else acc, event.y)
+        return x, y
+
+    def click_away(self, event):
+        self.max_height = MAX_LINES * self.min_height
+        print(event)
+        #if (not self.lb_up):
+        #    return True
+        print('click')
+        x, y, width, height = self.computeListBoxConfig()
+        actual_x, actual_y = self.get_mouse_position(event)
+
+        print({'actualx': actual_x, 'actualy': actual_y})
+        print(x, y, width, height)
+        
+        inside = actual_x > x and actual_x < x + width and actual_y > y and actual_y < y + height
+        print(inside)
+        print()
+        if (not inside):
+            self.destroyListBox()
+
     def createListBox(self):
         # frame used to place bounding frame arbitrarily
-        self.listBoxPlacingFrame = tk.Frame(self.container)
+        self.listBoxPlacingFrame = tk.Frame(self.bounding_container)
 
         # frame used to specify dimensions of list box arbitrarily
         self.listBoxBoundingFrame = tk.Frame(self.listBoxPlacingFrame)
@@ -40,6 +72,11 @@ class AutocompleteEntry(ttk.Frame):
         self.lb = tk.Listbox(self.listBoxScrollbarFrame)
         self.lb.bind("<Double-Button-1>", self.selection)
         self.lb.bind("<Right>", self.selection)
+
+        scrollbar = tk.Scrollbar(self.listBoxScrollbarFrame)
+        scrollbar.pack(side = tk.RIGHT, fill = tk.Y)
+        self.lb.config(yscrollcommand = scrollbar.set)
+        scrollbar.config(command = self.lb.yview)
 
         self.lb_up = True
     
@@ -54,33 +91,47 @@ class AutocompleteEntry(ttk.Frame):
         if not self.lb_up:
             return
         x, y, width, height = self.computeListBoxConfig()
+        #print({'x': x, 'y': y, 'width': width, 'height': height})
 
         self.lb.pack(fill="both", expand=True)
         self.lb.configure(height=math.floor(height / self.min_height))
 
         self.listBoxScrollbarFrame.place(in_=self.listBoxBoundingFrame, relx=0, rely=0, relheight=1, relwidth=1)
         self.listBoxBoundingFrame.place(in_=self.listBoxPlacingFrame, relx=0, rely=0, relheight=1, relwidth=1)
-        self.listBoxPlacingFrame.place(in_=self.container, x=x, y=y)
+        self.listBoxPlacingFrame.place(in_=self.bounding_container, x=x, y=y)
         self.listBoxPlacingFrame.configure(width=width, height=height)
 
     def computeListBoxConfig(self):
         # self.max_height must be multiple of self.min_height
         # returned height must be a multiple of min_height, that is, of one-row text entry widget height
         # otherwise outer frames will either be too long or too short to display list box
-        # place below
-        if self.winfo_y() + self.winfo_height() + self.min_height < self.container.winfo_height():
-            overflow = self.container.winfo_height() - self.winfo_y() - self.winfo_height() - self.max_height
+        #print('self', {'x': self.winfo_x(), 'y': self.winfo_y(), 'width': self.winfo_width(), 'height': self.winfo_height()})
+        #print('container', {'x': self.container.winfo_x(), 'y': self.container.winfo_y(), 'width': self.container.winfo_width(), 'height': self.container.winfo_height()})
+        #print('bounding_container', {'x': self.bounding_container.winfo_x(), 'y': self.bounding_container.winfo_y(), 'width': self.bounding_container.winfo_width(), 'height': self.bounding_container.winfo_height()})
+        # place below if distance between lowest points of container and bounding container is more than minimal listbox height
+        distance = (self.bounding_container.winfo_y() + self.bounding_container.winfo_height()) - (self.container.winfo_y() + self.container.winfo_height())
+        if distance > self.min_height:
+            overflow = distance - self.max_height
             height = math.floor((self.max_height + overflow if overflow < 0 else self.max_height) / self.min_height) * self.min_height
-            return self.winfo_x(), self.winfo_y() + self.winfo_height(), self.winfo_width(), height
+            
+            return (
+                traverseUp(self, lambda widget, acc: widget.winfo_x() + acc if widget and widget.master else acc, 0),
+                traverseUp(self, lambda widget, acc: widget.winfo_y() + acc if widget and widget.master else acc, self.winfo_height()),
+                self.winfo_width(),
+                height
+            )
         # place above
-        if self.winfo_y() - self.min_height > 0:
-            overflow = self.winfo_y() - self.max_height
-            if overflow < 0:
-                height =  math.floor((self.max_height - abs(overflow)) / self.min_height) * self.min_height
-                print('overflow', height, self.max_height)
-            else:
-                height = self.max_height  
-            return self.winfo_x(), self.winfo_y() - height, self.winfo_width(), height
+        distance = self.container.winfo_y() - self.bounding_container.winfo_y()
+        if distance > self.min_height:
+            overflow = distance - self.max_height
+            height =  math.floor((self.max_height + overflow if overflow < 0 else self.max_height) / self.min_height) * self.min_height
+            return (
+                traverseUp(self, lambda widget, acc: widget.winfo_x() + acc if widget and widget.master else acc, 0),
+                traverseUp(self, lambda widget, acc: widget.winfo_y() + acc if widget and widget.master else acc, 0) - height,
+                self.winfo_width(),
+                height
+            )
+
 
     def changed(self, *args):  
         if self.var.get() == '' and self.lb_up:
@@ -132,8 +183,8 @@ class AutocompleteEntry(ttk.Frame):
         return [w for w in self.suggestions if re.match(pattern, w)]
     
     def configure(self, event):
-        # self.winfo_height() yields height of entry with 1-row
-        # since we can not get text entry, listbox height directly (they yield height in rows), we take this self.winfo_height()
+        # self.bounding_container.winfo_height() yields height of entry with 1-row
+        # since we can not get text entry, listbox height directly (they yield height in rows), we take this self.bounding_container.winfo_height()
         # and use it to calculate possible height in rows
         self.min_height = self.winfo_height() 
         self.positionListBox()
