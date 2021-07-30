@@ -25,39 +25,12 @@ class AutocompleteEntry(ttk.Frame):
         self.entry = tk.Entry(self, textvariable=self.var)
         self.entry.pack(fill=tk.X, expand=True)
         
-        self.bind("<Return>", self.selection)
-        self.bind("<Up>", self.up)
-        self.bind("<Down>", self.down)
+        self.entry.bind("<Up>", self.up)
+        self.entry.bind("<Down>", self.down)
+ 
         self.bind("<Configure>", self.configure)
         self.bind('<FocusIn>', lambda _: self.changed())
-        self.bind('<FocusOut>', lambda _: self.destroyListBox())
-
-        # traditional FocusIn and FocusOut won't trigger when any of autocompleteEntry masters would be scrolled, so bind to root and check if clicked away from listbox
-        # if not done, listbox would be in bounding container when its contents are scrolled
-        #traverseUp(self.container, lambda widget, _: widget.bind('<Button>', lambda event: self.click_away(event)) if widget and not widget.master else None)
-    
-    def get_mouse_position(self, event):
-        x = traverseUp(event.widget, lambda widget, acc: widget.winfo_x() + acc if widget and widget.master else acc, event.x)
-        y = traverseUp(event.widget, lambda widget, acc: widget.winfo_y() + acc if widget and widget.master else acc, event.y)
-        return x, y
-
-    def click_away(self, event):
-        self.max_height = MAX_LINES * self.min_height
-        print(event)
-        #if (not self.lb_up):
-        #    return True
-        print('click')
-        x, y, width, height = self.computeListBoxConfig()
-        actual_x, actual_y = self.get_mouse_position(event)
-
-        print({'actualx': actual_x, 'actualy': actual_y})
-        print(x, y, width, height)
-        
-        inside = actual_x > x and actual_x < x + width and actual_y > y and actual_y < y + height
-        print(inside)
-        print()
-        if (not inside):
-            self.destroyListBox()
+        #self.bind('<FocusOut>', lambda _: self.destroyListBox())
 
     def createListBox(self):
         # frame used to place bounding frame arbitrarily
@@ -70,8 +43,10 @@ class AutocompleteEntry(ttk.Frame):
         self.listBoxScrollbarFrame = tk.Frame(self.listBoxBoundingFrame)
 
         self.lb = tk.Listbox(self.listBoxScrollbarFrame)
+        #self.lb.bind("<Button-1>", self.select)
         self.lb.bind("<Double-Button-1>", self.selection)
         self.lb.bind("<Right>", self.selection)
+        self.lb.bind("<Return>", self.selection)
 
         scrollbar = tk.Scrollbar(self.listBoxScrollbarFrame)
         scrollbar.pack(side = tk.RIGHT, fill = tk.Y)
@@ -113,12 +88,14 @@ class AutocompleteEntry(ttk.Frame):
         if distance > self.min_height:
             overflow = distance - self.max_height
             height = math.floor((self.max_height + overflow if overflow < 0 else self.max_height) / self.min_height) * self.min_height
+            # NOTE: investigate, why just setting height results in widget overflowing bounding container
+            #height = height - self.min_height * 2 if height - self.min_height * 2 > self.min_height else height
             
             return (
                 traverseUp(self, lambda widget, acc: widget.winfo_x() + acc if widget and widget.master else acc, 0),
                 traverseUp(self, lambda widget, acc: widget.winfo_y() + acc if widget and widget.master else acc, self.winfo_height()),
                 self.winfo_width(),
-                height - self.winfo_height() * 2 # NOTE: investigate, why just setting height results in widget overflowing bounding container
+                height
             )
         # place above
         distance = self.container.winfo_y() - self.bounding_container.winfo_y()
@@ -132,13 +109,13 @@ class AutocompleteEntry(ttk.Frame):
                 height
             )
 
-
-    def changed(self, *args):  
+    def changed(self, *args):
+        print('changed')
         if self.var.get() == '' and self.lb_up:
             self.destroyListBox()
             return
         words = self.comparison()
-        if words:      
+        if words:
             if not self.lb_up:
                 self.createListBox()
             self.lb.delete(0, tk.END)
@@ -152,6 +129,7 @@ class AutocompleteEntry(ttk.Frame):
     def selection(self, event):
         if not self.lb_up:
             return
+        self.lb.get(tk.ACTIVE)
         self.var.set(self.lb.get(tk.ACTIVE))
         self.destroyListBox()
         self.entry.icursor(tk.END)
@@ -160,27 +138,33 @@ class AutocompleteEntry(ttk.Frame):
         if not self.lb_up:
             return
         index = '0' if self.lb.curselection() == () else self.lb.curselection()[0]
-        if index == '0':
-            return             
         self.lb.selection_clear(first=index)
-        index = str(int(index)-1)                
+        index = str(max(int(index)-1, 0))              
         self.lb.selection_set(first=index)
-        self.lb.activate(index)
+        self.lb.event_generate("<<ListboxSelect>>")
 
     def down(self, event):
         if not self.lb_up:
             return
         index = '0' if self.lb.curselection() == () else self.lb.curselection()[0]
-        if index == tk.END:
-            return                      
         self.lb.selection_clear(first=index)
-        index = str(int(index)+1)        
+        index = str(min(int(index)+1, self.lb.size() - 1)) if index != '0' else '0'
         self.lb.selection_set(first=index)
-        self.lb.activate(index)
+        self.lb.event_generate("<<ListboxSelect>>")
 
     def comparison(self):
         pattern = re.compile('.*' + self.var.get() + '.*')
         return [w for w in self.suggestions if re.match(pattern, w)]
+
+    def select(self, event):
+        selection = event.widget.curselection()
+        print(selection, bool(selection))
+        if selection:
+            index = selection[0]
+            data = event.widget.get(index)  
+            print(data)  
+            self.lb.selection_set(first=index)
+            #self.lb.activate(index)
     
     def configure(self, event):
         # self.bounding_container.winfo_height() yields height of entry with 1-row

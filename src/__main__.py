@@ -271,7 +271,7 @@ class App(tk.Tk):
     def loadExternal(self, file_name):
         if file_name in os.listdir(approot) and os.path.isfile(file_name):
             file_path = os.path.abspath(file_name)
-            with open(file_path, 'r') as file:
+            with open(file_path, 'r', encoding='utf-8') as file:
                 content = file.read()
                 payload = json.loads(content)
                 return payload
@@ -279,9 +279,8 @@ class App(tk.Tk):
     def saveExternal(self, file_name, payload):
         if file_name in os.listdir(approot) and os.path.isfile(file_name):
             file_path = os.path.abspath(file_name)
-            with open(file_path, 'w') as file:
-                content = json.dumps(payload, ensure_ascii=False)
-                file.write(content)
+            with open(file_path, 'w', encoding='utf-8') as file:
+                json.dump(payload, file, ensure_ascii=False)
     
     def renderEntry(self, value):
         id = value['id']
