@@ -105,11 +105,11 @@ class AutocompleteEntry(ttk.Frame):
         # self.max_height must be multiple of self.min_height
         # returned height must be a multiple of min_height, that is, of one-row text entry widget height
         # otherwise outer frames will either be too long or too short to display list box
-        #print('self', {'x': self.winfo_x(), 'y': self.winfo_y(), 'width': self.winfo_width(), 'height': self.winfo_height()})
-        #print('container', {'x': self.container.winfo_x(), 'y': self.container.winfo_y(), 'width': self.container.winfo_width(), 'height': self.container.winfo_height()})
-        #print('bounding_container', {'x': self.bounding_container.winfo_x(), 'y': self.bounding_container.winfo_y(), 'width': self.bounding_container.winfo_width(), 'height': self.bounding_container.winfo_height()})
+        print('self', {'x': self.winfo_x(), 'y': self.winfo_y(), 'width': self.winfo_width(), 'height': self.winfo_height()})
+        print('container', {'x': self.container.winfo_x(), 'y': self.container.winfo_y(), 'width': self.container.winfo_width(), 'height': self.container.winfo_height()})
+        print('bounding_container', {'x': self.bounding_container.winfo_x(), 'y': self.bounding_container.winfo_y(), 'width': self.bounding_container.winfo_width(), 'height': self.bounding_container.winfo_height()})
         # place below if distance between lowest points of container and bounding container is more than minimal listbox height
-        distance = (self.bounding_container.winfo_y() + self.bounding_container.winfo_height()) - (self.container.winfo_y() + self.container.winfo_height())
+        distance = (self.bounding_container.winfo_y() + self.bounding_container.winfo_height() - self.container.winfo_y() + self.container.winfo_height())
         if distance > self.min_height:
             overflow = distance - self.max_height
             height = math.floor((self.max_height + overflow if overflow < 0 else self.max_height) / self.min_height) * self.min_height
@@ -118,7 +118,7 @@ class AutocompleteEntry(ttk.Frame):
                 traverseUp(self, lambda widget, acc: widget.winfo_x() + acc if widget and widget.master else acc, 0),
                 traverseUp(self, lambda widget, acc: widget.winfo_y() + acc if widget and widget.master else acc, self.winfo_height()),
                 self.winfo_width(),
-                height
+                height - self.winfo_height() * 2 # NOTE: investigate, why just setting height results in widget overflowing bounding container
             )
         # place above
         distance = self.container.winfo_y() - self.bounding_container.winfo_y()
@@ -127,7 +127,7 @@ class AutocompleteEntry(ttk.Frame):
             height =  math.floor((self.max_height + overflow if overflow < 0 else self.max_height) / self.min_height) * self.min_height
             return (
                 traverseUp(self, lambda widget, acc: widget.winfo_x() + acc if widget and widget.master else acc, 0),
-                traverseUp(self, lambda widget, acc: widget.winfo_y() + acc if widget and widget.master else acc, 0) - height,
+                traverseUp(self, lambda widget, acc: widget.winfo_y() + acc if widget and widget.master else acc, -height),
                 self.winfo_width(),
                 height
             )

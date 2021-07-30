@@ -232,7 +232,7 @@ class App(tk.Tk):
                         self.saveExternal(payload['autocomplete']['external'], payload['autocomplete']['data'])
                         self.reloadExternals()
                 del payload['autocomplete']['data']
-            to_replace[match] = json.dumps(payload, ensure_ascii=False)
+            to_replace[match] = '{{' + json.dumps(payload, ensure_ascii=False) + '}}'
         return to_replace
 
     def saveTemplates(self):
@@ -243,7 +243,7 @@ class App(tk.Tk):
                     return
                 availableParsers[ext].replace(
                     template['path'],
-                    self.saveFileStringVar.get() + 'updated' + ext,
+                    name + ext,
                     self.computeUpdatedTemplate
                 )
 
