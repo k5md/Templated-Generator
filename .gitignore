@@ -3,7 +3,7 @@
 *.odt
 *.ods
 *.zip
-address.json
+*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

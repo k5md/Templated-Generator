@@ -81,9 +81,9 @@ class App(tk.Tk):
 
         ### FRAMES
         self.rootFrame = tk.Frame(self)
-        default_font = tkinter.font.nametofont("TkDefaultFont")
-        default_font.configure(size=10)
-        self.rootFrame.option_add("*Font", default_font)
+        self.default_font = tkinter.font.nametofont("TkDefaultFont")
+        self.default_font.configure(size=10)
+        self.rootFrame.option_add("*Font", self.default_font)
         self.fieldsFrame = tk.LabelFrame(self.rootFrame, text=i18n.t('translate.fieldsTitle'))
         self.controlsFrame = tk.LabelFrame(self.rootFrame, text=i18n.t('translate.controlsTitle'))
 
@@ -295,7 +295,9 @@ class App(tk.Tk):
         if (autocomplete_suggestions):
             self._fields[id]['__entry'] = AutocompleteEntry(
                 container, autocomplete_suggestions, textvariable=self._fields[id]['__stringVar'],
-                bounding_container=self.rootFrame
+                bounding_container=self.rootFrame,
+                font=self.default_font,
+                window=self.rootFrame
             )
             
             oldOnScroll = copy_func(self.scrollableFrame.onScroll)
