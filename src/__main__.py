@@ -5,9 +5,10 @@ import json
 import tkinter.filedialog
 import tkinter.font
 import tkinter as tk
-from scrollableFrame import ScrollableFrame
+from libs.scrollableFrame import ScrollableFrame
+from libs.autocompleteEntry import AutocompleteEntry
 import re
-from num2t4ru import decimal2text
+from libs.num2t4ru import decimal2text
 from datetime import datetime
 import i18n
 import parsers.docx
@@ -18,7 +19,7 @@ import calendar
 from tkinter.messagebox import askyesno
 import itertools
 import operator
-from autocompleteEntry import AutocompleteEntry
+
 from tkinter import ttk
 
 availableParsers = {
