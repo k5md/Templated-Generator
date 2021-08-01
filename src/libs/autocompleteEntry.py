@@ -1,5 +1,3 @@
-## by Miguel Ángel Alarcos Torrecillas on Thu, 6 Sep 2012 (MIT) 
-
 import tkinter as tk
 from tkinter import ttk
 from tkinter.font import Font
