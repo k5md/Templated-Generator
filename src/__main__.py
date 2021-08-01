@@ -142,8 +142,6 @@ class App(tk.Tk):
         self.minsize(self.winfo_width(), self.winfo_height())
         self.winfo_toplevel().title("Templated generator")
 
-        #style = Style(theme='cosmo')
-
         # INIT VALUES
         self._fields = {} # key - id, value - { id, title, __stringVar, __entry }
 

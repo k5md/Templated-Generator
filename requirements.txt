@@ -1,7 +1,4 @@
 python-docx
-xlrd
-xlwt
-xlutils
 python-i18n
 python-i18n[YAML]
 py2exe
