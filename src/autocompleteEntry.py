@@ -24,7 +24,7 @@ class AutocompleteEntry(ttk.Frame):
 
         self.var = textvariable if textvariable else tk.StringVar()
         self.var.trace('w', self.changed)
-        self.entry = tk.Entry(self, textvariable=self.var)
+        self.entry = ttk.Entry(self, textvariable=self.var)
         self.entry.pack(fill=tk.X, expand=True)
         self.font = tk.font.Font(font=font)
  
@@ -48,7 +48,7 @@ class AutocompleteEntry(ttk.Frame):
         # frame containing scrollable listbox
         #self.listBoxScrollbarFrame = tk.Frame(self.bounding_container)
 
-        self.lb = tk.Listbox(self.bounding_container, relief=tk.RAISED, highlightthickness=1)
+        self.lb = tk.Listbox(self.bounding_container, relief=tk.RAISED, highlightthickness=1, activestyle='none')
         self.lb.bind("<Double-Button-1>", self.selection)
         self.lb.bind("<Return>", self.selection)
         self.lb.bind('<FocusOut>', self.focusOut )
@@ -78,7 +78,7 @@ class AutocompleteEntry(ttk.Frame):
         self.lb.configure(height=math.floor(height / self.min_height))
         print(math.floor(height / self.min_height))
 
-        self.lb.place(in_=self.bounding_container, x=x, y=y, width=width)
+        self.lb.place(in_=self.bounding_container, x=x - self.container.winfo_x(), y=y, width=width)
         
 
     def computeListBoxConfig(self):

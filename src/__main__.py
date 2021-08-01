@@ -19,6 +19,7 @@ from tkinter.messagebox import askyesno
 import itertools
 import operator
 from autocompleteEntry import AutocompleteEntry
+from tkinter import ttk
 
 availableParsers = {
     '.docx': parsers.docx,
@@ -80,14 +81,14 @@ class App(tk.Tk):
         i18n.set('fallback', 'ru')
 
         ### FRAMES
-        self.rootFrame = tk.Frame(self)
+        self.rootFrame = ttk.Frame(self)
         self.default_font = tkinter.font.nametofont("TkDefaultFont")
         self.default_font.configure(size=10)
         self.rootFrame.option_add("*Font", self.default_font)
-        self.fieldsFrame = tk.LabelFrame(self.rootFrame, text=i18n.t('translate.fieldsTitle'))
-        self.controlsFrame = tk.LabelFrame(self.rootFrame, text=i18n.t('translate.controlsTitle'))
+        self.fieldsFrame = ttk.LabelFrame(self.rootFrame, text=i18n.t('translate.fieldsTitle'))
+        self.controlsFrame = ttk.LabelFrame(self.rootFrame, text=i18n.t('translate.controlsTitle'))
 
-        self.rootFrame.pack(fill=tk.BOTH, expand=True)
+        self.rootFrame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         self.fieldsFrame.pack(side=tk.TOP, fill="both", expand=True)
         self.controlsFrame.pack(side=tk.BOTTOM, fill="x", pady=(10, 0))
 
@@ -96,17 +97,17 @@ class App(tk.Tk):
         self.scrollableFrame.pack(side="top", fill="both", anchor="nw", expand=True)
 
         ### OUTPUT FIELD ITEMS PACKING
-        self.templateFrame = tk.Frame(self.controlsFrame)
-        self.loadTemplateBtn = tk.Button(self.templateFrame, text = i18n.t('translate.loadTemplate'), command = self.loadTemplate)
-        self.clearTemplatesBtn = tk.Button(self.templateFrame, text = i18n.t('translate.clearTemplates'), command = self.clearTemplates)
-        self.templatesTextBoxLabel = tk.Label(self.templateFrame, text=i18n.t('translate.loadedTemplates'))
-        self.templatesTextBox = tk.Text(self.templateFrame, wrap='word', height=1, background="gray")
+        self.templateFrame = ttk.Frame(self.controlsFrame)
+        self.loadTemplateBtn = ttk.Button(self.templateFrame, text = i18n.t('translate.loadTemplate'), command = self.loadTemplate)
+        self.clearTemplatesBtn = ttk.Button(self.templateFrame, text = i18n.t('translate.clearTemplates'), command = self.clearTemplates)
+        self.templatesTextBoxLabel = ttk.Label(self.templateFrame, text=i18n.t('translate.loadedTemplates'))
+        self.templatesTextBox = ttk.Entry(self.templateFrame, background="grey")
 
-        self.saveFrame = tk.Frame(self.controlsFrame)
-        self.saveResultsBtn = tk.Button(self.saveFrame, text = i18n.t('translate.saveResults'), command = self.saveResults)
-        self.saveFileLabel = tk.Label(self.saveFrame, text=i18n.t('translate.saveName'))
+        self.saveFrame = ttk.Frame(self.controlsFrame)
+        self.saveResultsBtn = ttk.Button(self.saveFrame, text = i18n.t('translate.saveResults'), command = self.saveResults)
+        self.saveFileLabel = ttk.Label(self.saveFrame, text=i18n.t('translate.saveName'))
         self.saveFileStringVar = tk.StringVar()
-        self.saveFileEntry = tk.Entry(self.saveFrame, textvariable=self.saveFileStringVar)
+        self.saveFileEntry = ttk.Entry(self.saveFrame, textvariable=self.saveFileStringVar)
         
         self.saveFrame.pack(side=tk.TOP, fill="x", padx=5, pady=5)
         self.saveFileLabel.pack(side=tk.LEFT, fill="x")
@@ -140,6 +141,8 @@ class App(tk.Tk):
         self.minsize(self.winfo_width(), self.winfo_height())
         self.winfo_toplevel().title("Templated generator")
 
+        #style = Style(theme='cosmo')
+
         # INIT VALUES
         self._fields = {} # key - id, value - { id, title, __stringVar, __entry }
 
@@ -166,13 +169,13 @@ class App(tk.Tk):
         
         self.processTemplate(template)
         self.renderEntries()
-        self.templatesTextBox.delete(1.0, "end")
-        self.templatesTextBox.insert("1.0", ','.join(t['path'] for t in self._templates))
+        self.templatesTextBox.delete(0, tk.END)
+        self.templatesTextBox.insert(0, ','.join(t['path'] for t in self._templates))
     
     def clearTemplates(self):
         self._templates = []
         self._fields = {}
-        self.templatesTextBox.delete(1.0, "end")
+        self.templatesTextBox.delete(0, tk.END)
         for child in self.scrollableFrame.frame.winfo_children():
             child.destroy()
     
@@ -284,9 +287,9 @@ class App(tk.Tk):
     
     def renderEntry(self, value):
         id = value['id']
-        container = tk.Frame(self.scrollableFrame.frame)
-        container.pack(side=tk.TOP, fill='both', expand=True, padx=5)
-        label = tk.Label(container, text=value.get('title', id))
+        container = ttk.Frame(self.scrollableFrame.frame)
+        container.pack(side=tk.TOP, fill='both', expand=True, padx=5, pady=2.5)
+        label = ttk.Label(container, text=value.get('title', id))
         label.pack(side=tk.LEFT)
         self._fields[id]['__stringVar'] = tk.StringVar()
         self._fields[id]['__stringVar'].set(value.get('value', ''))
@@ -305,7 +308,7 @@ class App(tk.Tk):
             #self.scrollableFrame.onScroll = lambda : self.scrollableFrame.oldOnScroll() or self._fields[id]['__entry'].destroyListBox()
             self._fields[id]['__entry'].pack(fill=tk.X)
         else:
-            self._fields[id]['__entry'] = tk.Entry(container, textvariable=self._fields[id]['__stringVar'])
+            self._fields[id]['__entry'] = ttk.Entry(container, textvariable=self._fields[id]['__stringVar'])
             self._fields[id]['__entry'].pack(side=tk.RIGHT, fill="x", expand=True)
 
     def renderEntries(self):
@@ -334,7 +337,7 @@ class App(tk.Tk):
         for group in group_specified:
             for value in group:
                 self.renderEntry(value)
-            separator = tk.ttk.Separator(self.scrollableFrame.frame, orient='horizontal')
+            separator = ttk.Separator(self.scrollableFrame.frame, orient='horizontal')
             separator.pack(fill='x', pady=10)
         for value in group_not_specified_sorted:
             self.renderEntry(value)
