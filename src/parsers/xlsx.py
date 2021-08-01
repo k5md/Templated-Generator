@@ -25,6 +25,10 @@ def parse(path, container, parseEntry, findMatches):
 
 def replace(sourcePath, targetPath, computeMatch):
     tempPath = sourcePath + '_temp'
+    try:
+        shutil.rmtree(tempPath)
+    except Exception as e:
+        print(e)
     lastPortion = tempPath.split('\\')[-1] # relative path for zipf arcname construction
     with ZipFile(sourcePath, 'r') as zipObj:
         listOfFileNames = zipObj.namelist()
