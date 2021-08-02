@@ -1,9 +1,9 @@
-from datetime import datetime
+import datetime
 from libs.num2t4ru import decimal2text
 
 def ru_dmy():
     month_names = ['', 'января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
-    now = datetime.today()
+    now = datetime.datetime.today()
     return ' '.join([str(x) for x in [now.day, month_names[now.month], now.year]]) + 'г.'
 
 name_transform_map = {
@@ -11,6 +11,6 @@ name_transform_map = {
         int_units=((u'рубль', u'рубля', u'рублей'), 'm'),
         exp_units=((u'копейка', u'копейки', u'копеек'), 'f')
     ).capitalize(),
-    'inverted_date': lambda x: datetime.today().strftime('%Y%m%d')[2:],
+    'inverted_date': lambda x: datetime.datetime.today().strftime('%Y%m%d')[2:],
     'ru_dmy': lambda x: ru_dmy()
 }

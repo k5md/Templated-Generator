@@ -1,26 +1,22 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+import re
+import itertools
 import json
+import datetime
+import i18n
+
 import tkinter.filedialog
 import tkinter.font
+import tkinter.ttk
+import tkinter.messagebox
 import tkinter as tk
+
 from libs.scrollableFrame import ScrollableFrame
 from libs.autocompleteEntry import AutocompleteEntry
-import re
-from datetime import datetime
-import i18n
-import parsers.docx
-import parsers.xlsx
-import locale
-import time
-import calendar
-from tkinter.messagebox import askyesno
-import itertools
-import operator
-from tkinter import ttk
-from transforms import name_transform_map
 from parsers import ext_parser_map
+from transforms import name_transform_map
 from utils import has, split_by_property_presense, copy_func
 
 try:
@@ -39,12 +35,12 @@ class App(tk.Tk):
         i18n.set('fallback', 'ru')
 
         ### FRAMES
-        self.rootFrame = ttk.Frame(self)
+        self.rootFrame = tk.ttk.Frame(self)
         self.default_font = tkinter.font.nametofont("TkDefaultFont")
         self.default_font.configure(size=10)
         self.rootFrame.option_add("*Font", self.default_font)
-        self.fieldsFrame = ttk.LabelFrame(self.rootFrame, text=i18n.t('translate.fieldsTitle'))
-        self.controlsFrame = ttk.LabelFrame(self.rootFrame, text=i18n.t('translate.controlsTitle'))
+        self.fieldsFrame = tk.ttk.LabelFrame(self.rootFrame, text=i18n.t('translate.fieldsTitle'))
+        self.controlsFrame = tk.ttk.LabelFrame(self.rootFrame, text=i18n.t('translate.controlsTitle'))
 
         self.rootFrame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         self.fieldsFrame.pack(side=tk.TOP, fill="both", expand=True)
@@ -55,17 +51,17 @@ class App(tk.Tk):
         self.scrollableFrame.pack(side="top", fill="both", anchor="nw", expand=True)
 
         ### OUTPUT FIELD ITEMS PACKING
-        self.templateFrame = ttk.Frame(self.controlsFrame)
-        self.loadTemplateBtn = ttk.Button(self.templateFrame, text = i18n.t('translate.loadTemplate'), command = self.loadTemplate)
-        self.clearTemplatesBtn = ttk.Button(self.templateFrame, text = i18n.t('translate.clearTemplates'), command = self.clearTemplates)
-        self.templatesTextBoxLabel = ttk.Label(self.templateFrame, text=i18n.t('translate.loadedTemplates'))
-        self.templatesTextBox = ttk.Entry(self.templateFrame, background="grey")
+        self.templateFrame = tk.ttk.Frame(self.controlsFrame)
+        self.loadTemplateBtn = tk.ttk.Button(self.templateFrame, text = i18n.t('translate.loadTemplate'), command = self.loadTemplate)
+        self.clearTemplatesBtn = tk.ttk.Button(self.templateFrame, text = i18n.t('translate.clearTemplates'), command = self.clearTemplates)
+        self.templatesTextBoxLabel = tk.ttk.Label(self.templateFrame, text=i18n.t('translate.loadedTemplates'))
+        self.templatesTextBox = tk.ttk.Entry(self.templateFrame, background="grey")
 
-        self.saveFrame = ttk.Frame(self.controlsFrame)
-        self.saveResultsBtn = ttk.Button(self.saveFrame, text = i18n.t('translate.saveResults'), command = self.saveResults)
-        self.saveFileLabel = ttk.Label(self.saveFrame, text=i18n.t('translate.saveName'))
+        self.saveFrame = tk.ttk.Frame(self.controlsFrame)
+        self.saveResultsBtn = tk.ttk.Button(self.saveFrame, text = i18n.t('translate.saveResults'), command = self.saveResults)
+        self.saveFileLabel = tk.ttk.Label(self.saveFrame, text=i18n.t('translate.saveName'))
         self.saveFileStringVar = tk.StringVar()
-        self.saveFileEntry = ttk.Entry(self.saveFrame, textvariable=self.saveFileStringVar)
+        self.saveFileEntry = tk.ttk.Entry(self.saveFrame, textvariable=self.saveFileStringVar)
         
         self.saveFrame.pack(side=tk.TOP, fill="x", padx=5, pady=5)
         self.saveFileLabel.pack(side=tk.LEFT, fill="x")
@@ -108,7 +104,7 @@ class App(tk.Tk):
         for template in self._templates:
             self.loadTemplate(template)
 
-        date=datetime.today().strftime('%Y%m%d')
+        date=datetime.datetime.today().strftime('%Y%m%d')
         rendered = date[2:]
         self.saveFileStringVar.set(rendered + ' ')
 
@@ -215,7 +211,7 @@ class App(tk.Tk):
         filesInDirectory = [path for path in os.listdir(approot) if os.path.isfile(path)]
         for generatedFile in generatedFiles:
             if generatedFile in filesInDirectory:
-                proceed = askyesno(title=i18n.t('translate.replaceTitle'), message=i18n.t('translate.replaceMessage'))
+                proceed = tk.messagebox.askyesno(title=i18n.t('translate.replaceTitle'), message=i18n.t('translate.replaceMessage'))
                 if not proceed:
                     return
                 break
@@ -247,9 +243,9 @@ class App(tk.Tk):
     
     def renderEntry(self, value):
         id = value['id']
-        container = ttk.Frame(self.scrollableFrame.frame)
+        container = tk.ttk.Frame(self.scrollableFrame.frame)
         container.pack(side=tk.TOP, fill='both', expand=True, padx=5, pady=2.5)
-        label = ttk.Label(container, text=value.get('title', id))
+        label = tk.ttk.Label(container, text=value.get('title', id))
         label.pack(side=tk.LEFT)
         self._fields[id]['__stringVar'] = tk.StringVar()
         self._fields[id]['__stringVar'].set(value.get('value', ''))
@@ -268,7 +264,7 @@ class App(tk.Tk):
             #self.scrollableFrame.onScroll = lambda : self.scrollableFrame.oldOnScroll() or self._fields[id]['__entry'].destroyListBox()
             self._fields[id]['__entry'].pack(fill=tk.X)
         else:
-            self._fields[id]['__entry'] = ttk.Entry(container, textvariable=self._fields[id]['__stringVar'])
+            self._fields[id]['__entry'] = tk.ttk.Entry(container, textvariable=self._fields[id]['__stringVar'])
             self._fields[id]['__entry'].pack(side=tk.RIGHT, fill="x", expand=True)
 
     def renderEntries(self):
@@ -297,7 +293,7 @@ class App(tk.Tk):
         for group in group_specified:
             for value in group:
                 self.renderEntry(value)
-            separator = ttk.Separator(self.scrollableFrame.frame, orient='horizontal')
+            separator = tk.ttk.Separator(self.scrollableFrame.frame, orient='horizontal')
             separator.pack(fill='x', pady=10)
         for value in group_not_specified_sorted:
             self.renderEntry(value)
