@@ -8,7 +8,6 @@ import tkinter as tk
 from libs.scrollableFrame import ScrollableFrame
 from libs.autocompleteEntry import AutocompleteEntry
 import re
-from libs.num2t4ru import decimal2text
 from datetime import datetime
 import i18n
 import parsers.docx
@@ -19,60 +18,18 @@ import calendar
 from tkinter.messagebox import askyesno
 import itertools
 import operator
-
 from tkinter import ttk
-
-availableParsers = {
-    '.docx': parsers.docx,
-    '.xlsx': parsers.xlsx,
-}
+from transforms import name_transform_map
+from parsers import ext_parser_map
+from utils import has, split_by_property_presense, copy_func
 
 try:
     approot = os.path.dirname(os.path.abspath(__file__))
 except NameError:  # We are the main py2exe script, not a module
     approot = os.path.dirname(sys.executable)
 
-
-def ru_dmy():
-    month_names = ['', 'января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
-    now = datetime.today()
-    return ' '.join([str(x) for x in [now.day, month_names[now.month], now.year]]) + 'г.'
-
 LOCALES_PATH=os.path.join(approot, 'locales')
 DEFAULT_TEMPLATE_FILENAME = 'template'
-TRANSFORMS = {
-    'num2text': lambda x: decimal2text(x,
-        int_units=((u'рубль', u'рубля', u'рублей'), 'm'),
-        exp_units=((u'копейка', u'копейки', u'копеек'), 'f')
-    ).capitalize(),
-    'inverted_date': lambda x: datetime.today().strftime('%Y%m%d')[2:],
-    'ru_dmy': lambda x: ru_dmy()
-}
-
-def has(arr , key, value):
-    for x in arr:
-        if x[key] == value:
-            return True
-
-def split_by_property_presense(array, property):
-    present, missing = [], []
-    for item in array:
-        present.append(item) if property in item else missing.append(item)
-    return present, missing
-
-import types
-import functools
-
-def copy_func(f):
-    """Based on http://stackoverflow.com/a/6528148/190597 (Glenn Maynard)"""
-    g = types.FunctionType(f.__code__, f.__globals__, name=f.__name__,
-                           argdefs=f.__defaults__,
-                           closure=f.__closure__)
-    g = functools.update_wrapper(g, f)
-    g.__kwdefaults__ = f.__kwdefaults__
-    return g
-
-from functools import partial
 
 class App(tk.Tk):
     def __init__(self):
@@ -166,7 +123,11 @@ class App(tk.Tk):
         else:
             template = providedTemplate
         
-        self.processTemplate(template)
+        name, ext = os.path.splitext(template['path'])
+        if not (ext in ext_parser_map.keys()):
+            return
+        ext_parser_map[ext].parse(template['path'], self._fields, self.parseEntry, self.findMatches)
+
         self.renderEntries()
         self.templatesTextBox.delete(0, tk.END)
         self.templatesTextBox.insert(0, ','.join(t['path'] for t in self._templates))
@@ -193,8 +154,8 @@ class App(tk.Tk):
         payload = {}
         payload = json.loads(content)
         if 'getter' in payload:
-            if payload['getter'] in TRANSFORMS:
-                value = TRANSFORMS[payload['getter']](payload['value'])
+            if payload['getter'] in name_transform_map:
+                value = name_transform_map[payload['getter']](payload['value'])
                 payload['value'] = str(value)
         autocomplete = payload.get('autocomplete')
         if autocomplete:
@@ -212,8 +173,8 @@ class App(tk.Tk):
             payload = self.parseEntry(match)
             value = self._fields[payload['id']]['__stringVar'].get()
             if 'fn' in payload:
-                if payload['fn'] in TRANSFORMS:
-                    value = TRANSFORMS[payload['fn']](value)
+                if payload['fn'] in name_transform_map:
+                    value = name_transform_map[payload['fn']](value)
             if 'monetary' in payload and payload['monetary']:
                 value = "{:,.2f}".format(float(value)).replace(",", " ").replace('.', ',')
             if 'append' in payload:
@@ -241,9 +202,9 @@ class App(tk.Tk):
         if (self.rewriteTemplates.get()):
             for template in self._templates:
                 name, ext = os.path.splitext(template['path'])
-                if not (ext in availableParsers.keys()):
+                if not (ext in ext_parser_map.keys()):
                     return
-                availableParsers[ext].replace(
+                ext_parser_map[ext].replace(
                     template['path'],
                     name + ext,
                     self.computeUpdatedTemplate
@@ -261,9 +222,9 @@ class App(tk.Tk):
 
         for template in self._templates:
             name, ext = os.path.splitext(template['path'])
-            if not (ext in availableParsers.keys()):
+            if not (ext in ext_parser_map.keys()):
                 return
-            availableParsers[ext].replace(
+            ext_parser_map[ext].replace(
                 template['path'],
                 self.saveFileStringVar.get() + ext,
                 self.computeMatch
@@ -340,12 +301,6 @@ class App(tk.Tk):
             separator.pack(fill='x', pady=10)
         for value in group_not_specified_sorted:
             self.renderEntry(value)
-
-    def processTemplate(self, template):
-        name, ext = os.path.splitext(template['path'])
-        if not (ext in availableParsers.keys()):
-            return
-        availableParsers[ext].parse(template['path'], self._fields, self.parseEntry, self.findMatches)
 
 if __name__ == "__main__":
     app = App()

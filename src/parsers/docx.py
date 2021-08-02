@@ -62,7 +62,7 @@ def replace(sourcePath, targetPath, computeMatch):
             for cell in col.cells:
                 for p in cell.paragraphs:
                     paragraphs.append(p)
-    for paragraph in paragraphs:
+    for p in paragraphs:
         computeMatch(p.text, to_replace)
         replace_in_paragraph(p, to_replace)
     doc.save(targetPath)
