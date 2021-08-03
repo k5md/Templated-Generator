@@ -17,7 +17,7 @@ from libs.scrollableFrame import ScrollableFrame
 from libs.autocompleteEntry import AutocompleteEntry
 from parsers import ext_parser_map
 from transforms import name_transform_map
-from utils import has, split_by_property_presense, copy_func
+from utils import has, split_by_property_presense, copy_func, make_path
 
 try:
     approot = os.path.dirname(os.path.abspath(__file__))
@@ -117,7 +117,7 @@ class App(tk.Tk):
             return
         self.templates.append(template_path)
         self.loadTemplate(template_path)
-        self.renderEntries(self.fields.values())
+        self.renderEntries(self.fields.values(), self.rendered)
         self.renderTemplateBox()
     
     def renderTemplateBox(self):
@@ -127,7 +127,7 @@ class App(tk.Tk):
     def resetTemplates(self):
         self.clearTemplates()
         self.renderTemplateBox()
-        self.renderEntries(self.fields.values())
+        self.renderEntries(self.fields.values(), self.rendered)
 
     def saveResults(self):
         generatedFiles = [self.saveFileStringVar.get() + os.path.splitext(template)[1] for template in self.templates]
@@ -139,10 +139,83 @@ class App(tk.Tk):
                     return
                 break
         for template in self.templates:
-            self.save_result(template, name, self.saveFileStringVar.get())
+            self.save_result(template, self.saveFileStringVar.get(), { key: value['var'].get() for key, value in self.rendered.items() })
         if (self.rewriteTemplates.get()):
             for template in self.templates:
-                self.save_template(template)
+                self.save_template(template, { key: value['var'].get() for key, value in self.rendered.items() }, self.rewriteExternals.get())
+            self.reloadExternals()
+
+    def reloadExternals(self):
+        self.reload_externals()
+        for entry in self.rendered.values():
+            if self.fields.get(entry['id'], {}).get('autocomplete', {}).get('data', None):
+                entry['widget'].suggestions = self.fields[entry['id']]['autocomplete']['data']
+                entry['widget'].update()
+
+    def renderEntry(self, value, rendered):
+        id = value['id']
+
+        container = tk.ttk.Frame(self.scrollableFrame.frame)
+        container.pack(side=tk.TOP, fill='both', expand=True, padx=5, pady=2.5)
+
+        label = tk.ttk.Label(container, text=value.get('title', id))
+        label.pack(side=tk.LEFT)
+
+        make_path(rendered, id)
+        rendered[id]['id'] = id
+        rendered[id]['var'] = tk.StringVar()
+        rendered[id]['var'].set(value.get('value', ''))
+
+        autocomplete_suggestions = value.get('autocomplete', {}).get('data')
+        if (autocomplete_suggestions):
+            rendered[id]['widget'] = AutocompleteEntry(
+                container, autocomplete_suggestions, textvariable=rendered[id]['var'],
+                bounding_container=self.rootFrame,
+                font=self.default_font,
+                window=self.rootFrame
+            )
+            oldOnScroll = copy_func(self.scrollableFrame.onScroll)
+            self.scrollableFrame.onScroll = lambda: (oldOnScroll() and False) or rendered[id]['widget'].destroyListBox()
+            rendered[id]['widget'].pack(fill=tk.X)
+        else:
+            rendered[id]['widget'] = tk.ttk.Entry(container, textvariable=rendered[id]['var'])
+            rendered[id]['widget'].pack(side=tk.RIGHT, fill="x", expand=True)
+
+    def renderEntries(self, fields, rendered):
+        # clear entries container
+        for child in self.scrollableFrame.frame.winfo_children():
+            child.destroy()
+        
+        # remove scroll listeners
+        self.scrollableFrame.onScroll = lambda: None
+
+        # split fields by presense 'group' property into group_specified and group_not_specified
+        group_specified, group_not_specified = split_by_property_presense(fields, 'group')
+        # sort fields with no 'group' specified by 'title' property
+        group_not_specified_sorted = sorted(group_not_specified, key=lambda i: i['title'])
+        # group fields with 'group' specified by 'group' property value
+        group_specified_dict = { p: list(g) for p, g in itertools.groupby(group_specified, lambda i: i['group']) }
+
+        # sort each group entries by entry 'order' property, entries with missing 'order' property are sorted by title
+        # and place in the end
+        group_specified_dict_items_sorted = {}
+        for group, entries in group_specified_dict.items():
+            order_specified, order_not_specified = split_by_property_presense(entries, 'order')
+            order_not_specified = sorted(order_not_specified, key=lambda i: i['title'])
+            order_specified = sorted(order_specified, key=lambda i: int(i['order']))
+            group_specified_dict_items_sorted[group] = order_specified + order_not_specified
+
+        # group_specified_dict_items_sorted -> array of entries, entries groups are sorted by group name
+        group_specified = [v for k, v in sorted(group_specified_dict_items_sorted.items(), key=lambda e: e[0])]
+
+        # render groups separated with separator
+        for group in group_specified:
+            for value in group:
+                self.renderEntry(value, rendered)
+            separator = tk.ttk.Separator(self.scrollableFrame.frame, orient='horizontal')
+            separator.pack(fill='x', pady=10)
+        for value in group_not_specified_sorted:
+            self.renderEntry(value, rendered)
 
     ### ABOVE - GUI, BELOW - MODULE
 
@@ -173,37 +246,28 @@ class App(tk.Tk):
             with open(file_path, 'w', encoding='utf-8') as file:
                 json.dump(payload, file, ensure_ascii=False)
 
-    def save_result(self, template_path, name):
+    def save_result(self, template_path, target_name, replacements):
         name, ext = os.path.splitext(template_path)
         if not (ext in ext_parser_map.keys()):
             return
         ext_parser_map[ext].replace(
             template_path,
-            name + ext,
-            self.computeMatch
+            target_name + ext,
+            self.computeMatch,
+            replacements
         )
 
-    def save_template(self, template):
+    def save_template(self, template, replacements, updateExternals):
         name, ext = os.path.splitext(template)
         if not (ext in ext_parser_map.keys()):
             return
         ext_parser_map[ext].replace(
             template,
             name + ext,
-            self.computeUpdatedTemplate
+            self.computeUpdatedTemplate,
+            replacements,
+            updateExternals
         )
-
-
-    # NOT CLASSIFIED
-    def reloadExternals(self):
-        for entry in self.fields.values():
-            autocomplete = entry.get('autocomplete')
-            if autocomplete:
-                if type(autocomplete) is dict and autocomplete.get('external'):
-                    external = self.loadExternal(autocomplete.get('external'))
-                    self.fields[entry['id']]['autocomplete']['data'] = external
-                    self.fields[entry['id']]['__entry'].suggestions = external
-                    self.fields[entry['id']]['__entry'].update()
 
     def parseEntry(self, string):
         content = string[2:-2]
@@ -219,14 +283,12 @@ class App(tk.Tk):
                 external = self.loadExternal(autocomplete.get('external'))
                 payload['autocomplete']['data'] = external
         return payload
-    
 
-
-    def computeMatch(self, text, to_replace): # find matches, populate to_replace, return to_replace
+    def computeMatch(self, text, to_replace, replacements, *args, **kwargs): # find matches, populate to_replace, return to_replace
         matches = self.findMatches(text)
         for match in matches:
             payload = self.parseEntry(match)
-            value = self.fields[payload['id']]['__stringVar'].get()
+            value = replacements[payload['id']]
             if 'fn' in payload:
                 if payload['fn'] in name_transform_map:
                     value = name_transform_map[payload['fn']](value)
@@ -236,86 +298,29 @@ class App(tk.Tk):
                 value = str(value) + payload['append']
             to_replace[match] = value
         return to_replace
-    
-    def computeUpdatedTemplate(self, text, to_replace): # find matches, populate to_replace, return to_replace
+
+    def computeUpdatedTemplate(self, text, to_replace, replacements, updateExternals): # find matches, populate to_replace, return to_replace
         matches = self.findMatches(text)
         for match in matches:
             payload = self.parseEntry(match)
-            newValue = self.fields[payload['id']]['__stringVar'].get()
+            newValue = replacements[payload['id']]
             payload['value'] = newValue
-            if payload.get('autocomplete') and payload.get('autocomplete', {}).get('data'):
-                if newValue not in payload['autocomplete']['data']:
-                    payload['autocomplete']['data'].append(newValue) 
-                    if (self.rewriteExternals.get()):
+            if (updateExternals):
+                if payload.get('autocomplete') and payload.get('autocomplete', {}).get('data'):
+                    if newValue not in payload['autocomplete']['data']:
+                        payload['autocomplete']['data'].append(newValue) 
                         self.saveExternal(payload['autocomplete']['external'], payload['autocomplete']['data'])
-                        self.reloadExternals()
-                del payload['autocomplete']['data']
+                    del payload['autocomplete']['data']
             to_replace[match] = '{{' + json.dumps(payload, ensure_ascii=False) + '}}'
-        return to_replace
+        return to_replace  
 
-
-
-
-    
-    def renderEntry(self, value):
-        id = value['id']
-        container = tk.ttk.Frame(self.scrollableFrame.frame)
-        container.pack(side=tk.TOP, fill='both', expand=True, padx=5, pady=2.5)
-        label = tk.ttk.Label(container, text=value.get('title', id))
-        label.pack(side=tk.LEFT)
-        self.fields[id]['__stringVar'] = tk.StringVar()
-        self.fields[id]['__stringVar'].set(value.get('value', ''))
-
-        autocomplete_suggestions = self.fields[id].get('autocomplete', {}).get('data')
-        if (autocomplete_suggestions):
-            self.fields[id]['__entry'] = AutocompleteEntry(
-                container, autocomplete_suggestions, textvariable=self.fields[id]['__stringVar'],
-                bounding_container=self.rootFrame,
-                font=self.default_font,
-                window=self.rootFrame
-            )
-            oldOnScroll = copy_func(self.scrollableFrame.onScroll)
-            self.scrollableFrame.onScroll = lambda: (oldOnScroll() and False) or self.fields[id]['__entry'].destroyListBox()
-            self.fields[id]['__entry'].pack(fill=tk.X)
-        else:
-            self.fields[id]['__entry'] = tk.ttk.Entry(container, textvariable=self.fields[id]['__stringVar'])
-            self.fields[id]['__entry'].pack(side=tk.RIGHT, fill="x", expand=True)
-
-    def renderEntries(self, fields):
-        # clear entries container
-        for child in self.scrollableFrame.frame.winfo_children():
-            child.destroy()
-        
-        # remove scroll listeners
-        self.scrollableFrame.onScroll = lambda: None
-
-        # split fields by presense 'group' property into group_specified and group_not_specified
-        group_specified, group_not_specified = split_by_property_presense(fields, 'group')
-        # sort fields with no 'group' specified by 'title' property
-        group_not_specified_sorted = sorted(group_not_specified, key=lambda i: i['title'])
-        # group fields with 'group' specified by 'group' property value
-        group_specified_dict = { p: list(g) for p, g in itertools.groupby(group_specified, lambda i: i['group']) }
-
-        # sort each group entries by entry 'order' property, entries with missing 'order' property are sorted by title
-        # and place in the end
-        group_specified_dict_items_sorted = {}
-        for group, entries in group_specified_dict.items():
-            order_specified, order_not_specified = split_by_property_presense(entries, 'order')
-            order_not_specified = sorted(order_not_specified, key=lambda i: i['title'])
-            order_specified = sorted(order_specified, key=lambda i: int(i['order']))
-            group_specified_dict_items_sorted[group] = order_specified + order_not_specified
-
-        # group_specified_dict_items_sorted -> array of entries, entries groups are sorted by group name
-        group_specified = [v for k, v in sorted(group_specified_dict_items_sorted.items(), key=lambda e: e[0])]
-
-        # render groups separated with separator
-        for group in group_specified:
-            for value in group:
-                self.renderEntry(value)
-            separator = tk.ttk.Separator(self.scrollableFrame.frame, orient='horizontal')
-            separator.pack(fill='x', pady=10)
-        for value in group_not_specified_sorted:
-            self.renderEntry(value)
+    def reload_externals(self):
+        for entry in self.fields.values():
+            autocomplete = entry.get('autocomplete')
+            if autocomplete:
+                if type(autocomplete) is dict and autocomplete.get('external'):
+                    external = self.loadExternal(autocomplete.get('external'))
+                    self.fields[entry['id']]['autocomplete']['data'] = external
 
 if __name__ == "__main__":
     app = App()

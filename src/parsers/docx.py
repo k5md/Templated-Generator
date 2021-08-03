@@ -51,7 +51,7 @@ def parse(path, container, parseEntry, findMatches):
             payload = parseEntry(match)
             container[payload['id']] = payload
 
-def replace(sourcePath, targetPath, computeMatch):
+def replace(sourcePath, targetPath, computeMatch, replacements, updateExternal = False):
     doc = docx.Document(sourcePath)
     to_replace = {}
     paragraphs = []
@@ -63,6 +63,6 @@ def replace(sourcePath, targetPath, computeMatch):
                 for p in cell.paragraphs:
                     paragraphs.append(p)
     for p in paragraphs:
-        computeMatch(p.text, to_replace)
+        computeMatch(p.text, to_replace, replacements, updateExternal)
         replace_in_paragraph(p, to_replace)
     doc.save(targetPath)

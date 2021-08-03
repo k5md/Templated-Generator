@@ -20,3 +20,9 @@ def copy_func(f):
     g = functools.update_wrapper(g, f)
     g.__kwdefaults__ = f.__kwdefaults__
     return g
+
+def make_path(my_dict: dict, *paths: str) -> dict:
+    while paths:
+        key, *paths = paths
+        my_dict = my_dict.setdefault(key, {})
+    return my_dict

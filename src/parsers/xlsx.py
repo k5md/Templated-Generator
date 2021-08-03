@@ -23,7 +23,7 @@ def parse(path, container, parseEntry, findMatches):
                 container[payload['id']] = payload ## add check here for duplicates
     shutil.rmtree(tempPath)
 
-def replace(sourcePath, targetPath, computeMatch):
+def replace(sourcePath, targetPath, computeMatch, replacements, updateExternal = False):
     tempPath = sourcePath + '_temp'
     try:
         shutil.rmtree(tempPath)
@@ -41,7 +41,7 @@ def replace(sourcePath, targetPath, computeMatch):
     for si in root:
         for t in si:
             text = t.text
-            local_to_replace = computeMatch(t.text, {})
+            local_to_replace = computeMatch(t.text, {}, replacements, updateExternal)
             for match, value in local_to_replace.items():
                 text = text.replace(match, value)
             t.text = text
