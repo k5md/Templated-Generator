@@ -52,8 +52,8 @@ class App(tk.Tk):
 
         ### OUTPUT FIELD ITEMS PACKING
         self.templateFrame = tk.ttk.Frame(self.controlsFrame)
-        self.loadTemplateBtn = tk.ttk.Button(self.templateFrame, text = i18n.t('translate.loadTemplate'), command = self.loadTemplate)
-        self.clearTemplatesBtn = tk.ttk.Button(self.templateFrame, text = i18n.t('translate.clearTemplates'), command = self.clearTemplates)
+        self.loadTemplateBtn = tk.ttk.Button(self.templateFrame, text = i18n.t('translate.loadTemplate'), command = self.add_template)
+        self.clearTemplatesBtn = tk.ttk.Button(self.templateFrame, text = i18n.t('translate.clearTemplates'), command = self.resetTemplates)
         self.templatesTextBoxLabel = tk.ttk.Label(self.templateFrame, text=i18n.t('translate.loadedTemplates'))
         self.templatesTextBox = tk.ttk.Entry(self.templateFrame, background="grey")
 
@@ -96,54 +96,114 @@ class App(tk.Tk):
         self.winfo_toplevel().title("Templated generator")
 
         # INIT VALUES
-        self._fields = {} # key - id, value - { id, title, __stringVar, __entry }
+        self.fields = {} # key - id, value - { id, title, __stringVar, __entry }
+        self.rendered = {} # maps id from fields to { type: type of entity, widget: tk widget, var: tk variable }
 
-        self._templates = [] # value - { path }
+        self.templates = [] # value - { path }
         
-        self._templates = [{'path': os.path.abspath(path) } for path in os.listdir(approot) if os.path.isfile(path) and DEFAULT_TEMPLATE_FILENAME in path]
-        for template in self._templates:
-            self.loadTemplate(template)
+        for template in [os.path.abspath(path) for path in os.listdir(approot) if os.path.isfile(path) and DEFAULT_TEMPLATE_FILENAME in path]:
+            self.add_template(template)
 
-        date=datetime.datetime.today().strftime('%Y%m%d')
-        rendered = date[2:]
-        self.saveFileStringVar.set(rendered + ' ')
-
-    def loadTemplate(self, providedTemplate = None):
-        template = None
-        if (not providedTemplate):
-            path = tk.filedialog.Open(self).show()
-            if path == '' or has(self._templates, 'path', path):
+        date=datetime.datetime.today().strftime('%Y%m%d')[2:] + ' '
+        rendered = date
+        self.saveFileStringVar.set(rendered )
+    
+    def add_template(self, template_path = ''):
+        if (not template_path):
+            template_path = tk.filedialog.Open(self).show()
+            if template_path == '':
                 return
-            template = { 'path': path }
-            self._templates.append(template)
-        else:
-            template = providedTemplate
-        
-        name, ext = os.path.splitext(template['path'])
+        if template_path in self.templates:
+            return
+        self.templates.append(template_path)
+        self.loadTemplate(template_path)
+        self.renderEntries(self.fields.values())
+        self.renderTemplateBox()
+    
+    def renderTemplateBox(self):
+        self.templatesTextBox.delete(0, tk.END)
+        self.templatesTextBox.insert(0, ','.join(self.templates))
+    
+    def resetTemplates(self):
+        self.clearTemplates()
+        self.renderTemplateBox()
+        self.renderEntries(self.fields.values())
+
+    def saveResults(self):
+        generatedFiles = [self.saveFileStringVar.get() + os.path.splitext(template)[1] for template in self.templates]
+        filesInDirectory = [path for path in os.listdir(approot) if os.path.isfile(path)]
+        for generatedFile in generatedFiles:
+            if generatedFile in filesInDirectory:
+                proceed = tk.messagebox.askyesno(title=i18n.t('translate.replaceTitle'), message=i18n.t('translate.replaceMessage'))
+                if not proceed:
+                    return
+                break
+        for template in self.templates:
+            self.save_result(template, name, self.saveFileStringVar.get())
+        if (self.rewriteTemplates.get()):
+            for template in self.templates:
+                self.save_template(template)
+
+    ### ABOVE - GUI, BELOW - MODULE
+
+    def findMatches(self, text):
+        return re.findall(r'{{{.+?}}}+', text)
+
+    def loadTemplate(self, template):      
+        name, ext = os.path.splitext(template)
         if not (ext in ext_parser_map.keys()):
             return
-        ext_parser_map[ext].parse(template['path'], self._fields, self.parseEntry, self.findMatches)
-
-        self.renderEntries()
-        self.templatesTextBox.delete(0, tk.END)
-        self.templatesTextBox.insert(0, ','.join(t['path'] for t in self._templates))
-    
+        ext_parser_map[ext].parse(template, self.fields, self.parseEntry, self.findMatches)
+        
     def clearTemplates(self):
-        self._templates = []
-        self._fields = {}
-        self.templatesTextBox.delete(0, tk.END)
-        for child in self.scrollableFrame.frame.winfo_children():
-            child.destroy()
+        self.templates = []
+        self.fields = {}
+
+    def loadExternal(self, file_name):
+        if file_name in os.listdir(approot) and os.path.isfile(file_name):
+            file_path = os.path.abspath(file_name)
+            with open(file_path, 'r', encoding='utf-8') as file:
+                content = file.read()
+                payload = json.loads(content)
+                return payload
     
+    def saveExternal(self, file_name, payload):
+        if file_name in os.listdir(approot) and os.path.isfile(file_name):
+            file_path = os.path.abspath(file_name)
+            with open(file_path, 'w', encoding='utf-8') as file:
+                json.dump(payload, file, ensure_ascii=False)
+
+    def save_result(self, template_path, name):
+        name, ext = os.path.splitext(template_path)
+        if not (ext in ext_parser_map.keys()):
+            return
+        ext_parser_map[ext].replace(
+            template_path,
+            name + ext,
+            self.computeMatch
+        )
+
+    def save_template(self, template):
+        name, ext = os.path.splitext(template)
+        if not (ext in ext_parser_map.keys()):
+            return
+        ext_parser_map[ext].replace(
+            template,
+            name + ext,
+            self.computeUpdatedTemplate
+        )
+
+
+    # NOT CLASSIFIED
     def reloadExternals(self):
-        for entry in self._fields.values():
+        for entry in self.fields.values():
             autocomplete = entry.get('autocomplete')
             if autocomplete:
                 if type(autocomplete) is dict and autocomplete.get('external'):
                     external = self.loadExternal(autocomplete.get('external'))
-                    self._fields[entry['id']]['autocomplete']['data'] = external
-                    self._fields[entry['id']]['__entry'].suggestions = external
-                    self._fields[entry['id']]['__entry'].update()
+                    self.fields[entry['id']]['autocomplete']['data'] = external
+                    self.fields[entry['id']]['__entry'].suggestions = external
+                    self.fields[entry['id']]['__entry'].update()
 
     def parseEntry(self, string):
         content = string[2:-2]
@@ -160,14 +220,13 @@ class App(tk.Tk):
                 payload['autocomplete']['data'] = external
         return payload
     
-    def findMatches(self, text):
-        return re.findall(r'{{{.+?}}}+', text)
+
 
     def computeMatch(self, text, to_replace): # find matches, populate to_replace, return to_replace
         matches = self.findMatches(text)
         for match in matches:
             payload = self.parseEntry(match)
-            value = self._fields[payload['id']]['__stringVar'].get()
+            value = self.fields[payload['id']]['__stringVar'].get()
             if 'fn' in payload:
                 if payload['fn'] in name_transform_map:
                     value = name_transform_map[payload['fn']](value)
@@ -182,7 +241,7 @@ class App(tk.Tk):
         matches = self.findMatches(text)
         for match in matches:
             payload = self.parseEntry(match)
-            newValue = self._fields[payload['id']]['__stringVar'].get()
+            newValue = self.fields[payload['id']]['__stringVar'].get()
             payload['value'] = newValue
             if payload.get('autocomplete') and payload.get('autocomplete', {}).get('data'):
                 if newValue not in payload['autocomplete']['data']:
@@ -194,52 +253,9 @@ class App(tk.Tk):
             to_replace[match] = '{{' + json.dumps(payload, ensure_ascii=False) + '}}'
         return to_replace
 
-    def saveTemplates(self):
-        if (self.rewriteTemplates.get()):
-            for template in self._templates:
-                name, ext = os.path.splitext(template['path'])
-                if not (ext in ext_parser_map.keys()):
-                    return
-                ext_parser_map[ext].replace(
-                    template['path'],
-                    name + ext,
-                    self.computeUpdatedTemplate
-                )
 
-    def saveResults(self):
-        generatedFiles = [self.saveFileStringVar.get() + os.path.splitext(template['path'])[1] for template in self._templates]
-        filesInDirectory = [path for path in os.listdir(approot) if os.path.isfile(path)]
-        for generatedFile in generatedFiles:
-            if generatedFile in filesInDirectory:
-                proceed = tk.messagebox.askyesno(title=i18n.t('translate.replaceTitle'), message=i18n.t('translate.replaceMessage'))
-                if not proceed:
-                    return
-                break
 
-        for template in self._templates:
-            name, ext = os.path.splitext(template['path'])
-            if not (ext in ext_parser_map.keys()):
-                return
-            ext_parser_map[ext].replace(
-                template['path'],
-                self.saveFileStringVar.get() + ext,
-                self.computeMatch
-            )
-        self.saveTemplates()
-    
-    def loadExternal(self, file_name):
-        if file_name in os.listdir(approot) and os.path.isfile(file_name):
-            file_path = os.path.abspath(file_name)
-            with open(file_path, 'r', encoding='utf-8') as file:
-                content = file.read()
-                payload = json.loads(content)
-                return payload
-    
-    def saveExternal(self, file_name, payload):
-        if file_name in os.listdir(approot) and os.path.isfile(file_name):
-            file_path = os.path.abspath(file_name)
-            with open(file_path, 'w', encoding='utf-8') as file:
-                json.dump(payload, file, ensure_ascii=False)
+
     
     def renderEntry(self, value):
         id = value['id']
@@ -247,32 +263,34 @@ class App(tk.Tk):
         container.pack(side=tk.TOP, fill='both', expand=True, padx=5, pady=2.5)
         label = tk.ttk.Label(container, text=value.get('title', id))
         label.pack(side=tk.LEFT)
-        self._fields[id]['__stringVar'] = tk.StringVar()
-        self._fields[id]['__stringVar'].set(value.get('value', ''))
+        self.fields[id]['__stringVar'] = tk.StringVar()
+        self.fields[id]['__stringVar'].set(value.get('value', ''))
 
-        autocomplete_suggestions = self._fields[id].get('autocomplete', {}).get('data')
+        autocomplete_suggestions = self.fields[id].get('autocomplete', {}).get('data')
         if (autocomplete_suggestions):
-            self._fields[id]['__entry'] = AutocompleteEntry(
-                container, autocomplete_suggestions, textvariable=self._fields[id]['__stringVar'],
+            self.fields[id]['__entry'] = AutocompleteEntry(
+                container, autocomplete_suggestions, textvariable=self.fields[id]['__stringVar'],
                 bounding_container=self.rootFrame,
                 font=self.default_font,
                 window=self.rootFrame
             )
-            
             oldOnScroll = copy_func(self.scrollableFrame.onScroll)
-            self.scrollableFrame.onScroll = lambda: (oldOnScroll() and False) or self._fields[id]['__entry'].destroyListBox()
-            #self.scrollableFrame.onScroll = lambda : self.scrollableFrame.oldOnScroll() or self._fields[id]['__entry'].destroyListBox()
-            self._fields[id]['__entry'].pack(fill=tk.X)
+            self.scrollableFrame.onScroll = lambda: (oldOnScroll() and False) or self.fields[id]['__entry'].destroyListBox()
+            self.fields[id]['__entry'].pack(fill=tk.X)
         else:
-            self._fields[id]['__entry'] = tk.ttk.Entry(container, textvariable=self._fields[id]['__stringVar'])
-            self._fields[id]['__entry'].pack(side=tk.RIGHT, fill="x", expand=True)
+            self.fields[id]['__entry'] = tk.ttk.Entry(container, textvariable=self.fields[id]['__stringVar'])
+            self.fields[id]['__entry'].pack(side=tk.RIGHT, fill="x", expand=True)
 
-    def renderEntries(self):
+    def renderEntries(self, fields):
+        # clear entries container
         for child in self.scrollableFrame.frame.winfo_children():
             child.destroy()
+        
+        # remove scroll listeners
+        self.scrollableFrame.onScroll = lambda: None
 
         # split fields by presense 'group' property into group_specified and group_not_specified
-        group_specified, group_not_specified = split_by_property_presense(self._fields.values(), 'group')
+        group_specified, group_not_specified = split_by_property_presense(fields, 'group')
         # sort fields with no 'group' specified by 'title' property
         group_not_specified_sorted = sorted(group_not_specified, key=lambda i: i['title'])
         # group fields with 'group' specified by 'group' property value
@@ -290,6 +308,7 @@ class App(tk.Tk):
         # group_specified_dict_items_sorted -> array of entries, entries groups are sorted by group name
         group_specified = [v for k, v in sorted(group_specified_dict_items_sorted.items(), key=lambda e: e[0])]
 
+        # render groups separated with separator
         for group in group_specified:
             for value in group:
                 self.renderEntry(value)
