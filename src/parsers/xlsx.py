@@ -28,7 +28,7 @@ def replace(sourcePath, targetPath, computeMatch, replacements, updateExternal =
     try:
         shutil.rmtree(tempPath)
     except Exception as e:
-        print(e)
+        pass
     lastPortion = tempPath.split('\\')[-1] # relative path for zipf arcname construction
     with ZipFile(sourcePath, 'r') as zipObj:
         listOfFileNames = zipObj.namelist()
