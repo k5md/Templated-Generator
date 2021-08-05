@@ -4,6 +4,8 @@ import sys
 import itertools
 import datetime
 import i18n
+import locale
+import pycountry
 
 import tkinter.filedialog
 import tkinter.font
@@ -15,6 +17,8 @@ from libs.scrollableFrame import ScrollableFrame
 from libs.autocompleteEntry import AutocompleteEntry
 from utils import split_by_property_presense, copy_func, make_path
 from tempgen import Tempgen
+
+locale.setlocale(locale.LC_ALL, '')
 
 try:
     approot = os.path.dirname(os.path.abspath(__file__))
@@ -29,30 +33,31 @@ class App(tk.Tk):
         super().__init__()
 
         i18n.load_path.append(LOCALES_PATH)
-        i18n.set('fallback', 'ru')      
+        i18n.set('fallback', 'en')
+        i18n.set('locale', locale.getlocale()[0][0:2].lower())   
 
         ### FRAMES
         self.root_frame = tk.ttk.Frame(self)
-        self.default_font = tkinter.font.nametofont("TkDefaultFont")
+        self.default_font = tkinter.font.nametofont('TkDefaultFont')
         self.default_font.configure(size=10)
-        self.root_frame.option_add("*Font", self.default_font)
+        self.root_frame.option_add('*Font', self.default_font)
         self.fields_frame = tk.ttk.LabelFrame(self.root_frame, text=i18n.t('translate.fieldsTitle'))
         self.controls_frame = tk.ttk.LabelFrame(self.root_frame, text=i18n.t('translate.controlsTitle'))
 
         self.root_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-        self.fields_frame.pack(side=tk.TOP, fill="both", expand=True)
-        self.controls_frame.pack(side=tk.BOTTOM, fill="x", pady=(10, 0))
+        self.fields_frame.pack(side=tk.TOP, fill='both', expand=True)
+        self.controls_frame.pack(side=tk.BOTTOM, fill='x', pady=(10, 0))
 
         ### FIELDS FRAME ITEMS PACKING
         self.scrollable_frame = ScrollableFrame(self.fields_frame)
-        self.scrollable_frame.pack(side="top", fill="both", anchor="nw", expand=True)
+        self.scrollable_frame.pack(side='top', fill='both', anchor='nw', expand=True)
 
         ### OUTPUT FIELD ITEMS PACKING
         self.template_frame = tk.ttk.Frame(self.controls_frame)
         self.load_template_btn = tk.ttk.Button(self.template_frame, text = i18n.t('translate.loadTemplate'), command = self.add_template)
         self.clear_templates_btn = tk.ttk.Button(self.template_frame, text = i18n.t('translate.clearTemplates'), command = self.clear_template_list)
         self.templates_entry_label = tk.ttk.Label(self.template_frame, text=i18n.t('translate.loadedTemplates'))
-        self.templates_entry = tk.ttk.Entry(self.template_frame, background="grey")
+        self.templates_entry = tk.ttk.Entry(self.template_frame, background='grey')
 
         self.save_frame = tk.ttk.Frame(self.controls_frame)
         self.save_results_btn = tk.ttk.Button(self.save_frame, text = i18n.t('translate.saveResults'), command = self.save_generated)
@@ -61,16 +66,16 @@ class App(tk.Tk):
         self.save_file_var.set(datetime.datetime.today().strftime('%Y%m%d')[2:] + ' ')
         self.save_file_entry = tk.ttk.Entry(self.save_frame, textvariable=self.save_file_var)
         
-        self.save_frame.pack(side=tk.TOP, fill="x", padx=5, pady=5)
-        self.save_file_label.pack(side=tk.LEFT, fill="x")
-        self.save_file_entry.pack(side=tk.LEFT, fill="x", expand=True, padx=(0, 5))
-        self.save_results_btn.pack(side=tk.LEFT, fill="x", padx=(0, 5))
+        self.save_frame.pack(side=tk.TOP, fill='x', padx=5, pady=5)
+        self.save_file_label.pack(side=tk.LEFT, fill='x')
+        self.save_file_entry.pack(side=tk.LEFT, fill='x', expand=True, padx=(0, 5))
+        self.save_results_btn.pack(side=tk.LEFT, fill='x', padx=(0, 5))
 
-        self.templates_entry_label.pack(side=tk.LEFT, fill="x")
-        self.templates_entry.pack(side=tk.LEFT, fill="x", expand=True, padx=(0, 5))
-        self.load_template_btn.pack(side=tk.LEFT, fill="x", padx=(0, 5))
-        self.clear_templates_btn.pack(side=tk.LEFT, fill="x", padx=(0, 5))
-        self.template_frame.pack(side=tk.TOP, fill="x", padx=5, pady=5)
+        self.templates_entry_label.pack(side=tk.LEFT, fill='x')
+        self.templates_entry.pack(side=tk.LEFT, fill='x', expand=True, padx=(0, 5))
+        self.load_template_btn.pack(side=tk.LEFT, fill='x', padx=(0, 5))
+        self.clear_templates_btn.pack(side=tk.LEFT, fill='x', padx=(0, 5))
+        self.template_frame.pack(side=tk.TOP, fill='x', padx=5, pady=5)
 
         # MENU BAR
         self.menubar = tk.Menu(self)
@@ -89,7 +94,7 @@ class App(tk.Tk):
         self.columnconfigure(0, weight=1)
         self.update_idletasks()
         self.minsize(self.winfo_width(), self.winfo_height())
-        self.winfo_toplevel().title("Templated generator")
+        self.winfo_toplevel().title('Templated generator')
 
         # INIT VALUES
         self.tempgen = Tempgen()
@@ -142,7 +147,7 @@ class App(tk.Tk):
         id = value['id']
 
         container = tk.ttk.Frame(self.scrollable_frame.frame)
-        container.pack(side=tk.TOP, fill='both', expand=True, padx=5, pady=2.5)
+        container.pack(side=tk.TOP, fill='both', expand=True, padx=5, pady=2)
 
         label = tk.ttk.Label(container, text=value.get('title', id))
         label.pack(side=tk.LEFT)
@@ -165,7 +170,7 @@ class App(tk.Tk):
             rendered[id]['widget'].pack(fill=tk.X)
         else:
             rendered[id]['widget'] = tk.ttk.Entry(container, textvariable=rendered[id]['var'])
-            rendered[id]['widget'].pack(side=tk.RIGHT, fill="x", expand=True)
+            rendered[id]['widget'].pack(side=tk.RIGHT, fill='x', expand=True)
 
     def render_entries(self, fields, rendered):
         # clear entries container

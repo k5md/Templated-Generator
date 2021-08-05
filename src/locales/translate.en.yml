@@ -1,0 +1,13 @@
+en:
+  fieldsTitle: 'Form'
+  controlsTitle: 'Actions'
+  loadTemplate: 'Load template'
+  clearTemplates: 'Clear templates'
+  saveResults: 'Save'
+  saveName: 'File name:'
+  loadedTemplates: 'Active templates:'
+  replaceTitle: 'Confirmation'
+  replaceMessage: 'One or more files with given name are already present in the directory. Do you want to continue and replace these files?'
+  settings: 'Settings'
+  rewriteTemplates: 'Rewrite templates'
+  rewriteExternals: 'Rewrite externals'
