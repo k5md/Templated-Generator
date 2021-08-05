@@ -18,23 +18,23 @@ class Tempgen():
         self.fields = {} # key - id, value - { id, title, __stringVar, __entry }
         self.templates = [] # value - { path }
 
-    def findMatches(self, text):
+    def find_matches(self, text):
         return re.findall(r'{{{.+?}}}+', text)
 
-    def loadTemplate(self, template):
+    def load_template(self, template):
         if template in self.templates:
             return
         name, ext = os.path.splitext(template)
         if not (ext in ext_parser_map.keys()):
             return
-        ext_parser_map[ext].parse(template, self.fields, self.parseEntry, self.findMatches)
+        ext_parser_map[ext].parse(template, self.fields, self.parse_entry, self.find_matches)
         self.templates.append(template)
         
-    def clearTemplates(self):
+    def clear_templates(self):
         self.templates = []
         self.fields = {}
 
-    def loadExternal(self, file_name):
+    def load_external(self, file_name):
         if file_name in os.listdir(approot) and os.path.isfile(file_name):
             file_path = os.path.abspath(file_name)
             with open(file_path, 'r', encoding='utf-8') as file:
@@ -42,7 +42,7 @@ class Tempgen():
                 payload = json.loads(content)
                 return payload
     
-    def saveExternal(self, file_name, payload):
+    def save_external(self, file_name, payload):
         if file_name in os.listdir(approot) and os.path.isfile(file_name):
             file_path = os.path.abspath(file_name)
             with open(file_path, 'w', encoding='utf-8') as file:
@@ -55,23 +55,23 @@ class Tempgen():
         ext_parser_map[ext].replace(
             template_path,
             target_name + ext,
-            self.computeMatch,
+            self.compute_match,
             replacements
         )
 
-    def save_template(self, template, replacements, updateExternals):
+    def save_template(self, template, replacements, update_externals):
         name, ext = os.path.splitext(template)
         if not (ext in ext_parser_map.keys()):
             return
         ext_parser_map[ext].replace(
             template,
             name + ext,
-            self.computeUpdatedTemplate,
+            self.compute_updated_template,
             replacements,
-            updateExternals
+            update_externals
         )
 
-    def parseEntry(self, string):
+    def parse_entry(self, string):
         content = string[2:-2]
         payload = {}
         payload = json.loads(content)
@@ -82,14 +82,14 @@ class Tempgen():
         autocomplete = payload.get('autocomplete')
         if autocomplete:
             if type(autocomplete) is dict and autocomplete.get('external'):
-                external = self.loadExternal(autocomplete.get('external'))
+                external = self.load_external(autocomplete.get('external'))
                 payload['autocomplete']['data'] = external
         return payload
 
-    def computeMatch(self, text, to_replace, replacements, *args, **kwargs): # find matches, populate to_replace, return to_replace
-        matches = self.findMatches(text)
+    def compute_match(self, text, to_replace, replacements, *args, **kwargs): # find matches, populate to_replace, return to_replace
+        matches = self.find_matches(text)
         for match in matches:
-            payload = self.parseEntry(match)
+            payload = self.parse_entry(match)
             value = replacements[payload['id']]
             if 'fn' in payload:
                 if payload['fn'] in name_transform_map:
@@ -101,17 +101,17 @@ class Tempgen():
             to_replace[match] = value
         return to_replace
 
-    def computeUpdatedTemplate(self, text, to_replace, replacements, updateExternals): # find matches, populate to_replace, return to_replace
-        matches = self.findMatches(text)
+    def compute_updated_template(self, text, to_replace, replacements, update_externals): # find matches, populate to_replace, return to_replace
+        matches = self.find_matches(text)
         for match in matches:
-            payload = self.parseEntry(match)
+            payload = self.parse_entry(match)
             newValue = replacements[payload['id']]
             payload['value'] = newValue
-            if (updateExternals):
+            if (update_externals):
                 if payload.get('autocomplete') and payload.get('autocomplete', {}).get('data'):
                     if newValue not in payload['autocomplete']['data']:
                         payload['autocomplete']['data'].append(newValue) 
-                        self.saveExternal(payload['autocomplete']['external'], payload['autocomplete']['data'])
+                        self.save_external(payload['autocomplete']['external'], payload['autocomplete']['data'])
                     del payload['autocomplete']['data']
             to_replace[match] = '{{' + json.dumps(payload, ensure_ascii=False) + '}}'
         return to_replace  
@@ -121,5 +121,5 @@ class Tempgen():
             autocomplete = entry.get('autocomplete')
             if autocomplete:
                 if type(autocomplete) is dict and autocomplete.get('external'):
-                    external = self.loadExternal(autocomplete.get('external'))
+                    external = self.load_external(autocomplete.get('external'))
                     self.fields[entry['id']]['autocomplete']['data'] = external

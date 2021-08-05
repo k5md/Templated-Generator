@@ -35,7 +35,7 @@ def replace_in_paragraph(p, d):
     for replaced, replacement in d.items():
         paragraph_replace_text(p, replaced, replacement)
 
-def parse(path, container, parseEntry, findMatches):
+def parse(path, container, parse_entry, find_matches):
     doc = docx.Document(path)
     paragraphs = []
     for p in doc.paragraphs:
@@ -46,13 +46,13 @@ def parse(path, container, parseEntry, findMatches):
                 for p in cell.paragraphs:
                     paragraphs.append(p)
     for p in paragraphs:
-        matches = findMatches(p.text)
+        matches = find_matches(p.text)
         for match in matches:
-            payload = parseEntry(match)
+            payload = parse_entry(match)
             container[payload['id']] = payload
 
-def replace(sourcePath, targetPath, computeMatch, replacements, updateExternal = False):
-    doc = docx.Document(sourcePath)
+def replace(source_path, target_path, compute_match, replacements, update_external = False):
+    doc = docx.Document(source_path)
     to_replace = {}
     paragraphs = []
     for p in doc.paragraphs:
@@ -63,6 +63,6 @@ def replace(sourcePath, targetPath, computeMatch, replacements, updateExternal =
                 for p in cell.paragraphs:
                     paragraphs.append(p)
     for p in paragraphs:
-        computeMatch(p.text, to_replace, replacements, updateExternal)
+        compute_match(p.text, to_replace, replacements, update_external)
         replace_in_paragraph(p, to_replace)
-    doc.save(targetPath)
+    doc.save(target_path)

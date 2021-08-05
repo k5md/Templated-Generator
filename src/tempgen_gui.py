@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-import re
 import itertools
-import json
 import datetime
 import i18n
 
@@ -15,9 +13,7 @@ import tkinter as tk
 
 from libs.scrollableFrame import ScrollableFrame
 from libs.autocompleteEntry import AutocompleteEntry
-from parsers import ext_parser_map
-from transforms import name_transform_map
-from utils import has, split_by_property_presense, copy_func, make_path
+from utils import split_by_property_presense, copy_func, make_path
 from tempgen import Tempgen
 
 try:
@@ -36,59 +32,59 @@ class App(tk.Tk):
         i18n.set('fallback', 'ru')      
 
         ### FRAMES
-        self.rootFrame = tk.ttk.Frame(self)
+        self.root_frame = tk.ttk.Frame(self)
         self.default_font = tkinter.font.nametofont("TkDefaultFont")
         self.default_font.configure(size=10)
-        self.rootFrame.option_add("*Font", self.default_font)
-        self.fieldsFrame = tk.ttk.LabelFrame(self.rootFrame, text=i18n.t('translate.fieldsTitle'))
-        self.controlsFrame = tk.ttk.LabelFrame(self.rootFrame, text=i18n.t('translate.controlsTitle'))
+        self.root_frame.option_add("*Font", self.default_font)
+        self.fields_frame = tk.ttk.LabelFrame(self.root_frame, text=i18n.t('translate.fieldsTitle'))
+        self.controls_frame = tk.ttk.LabelFrame(self.root_frame, text=i18n.t('translate.controlsTitle'))
 
-        self.rootFrame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-        self.fieldsFrame.pack(side=tk.TOP, fill="both", expand=True)
-        self.controlsFrame.pack(side=tk.BOTTOM, fill="x", pady=(10, 0))
+        self.root_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        self.fields_frame.pack(side=tk.TOP, fill="both", expand=True)
+        self.controls_frame.pack(side=tk.BOTTOM, fill="x", pady=(10, 0))
 
         ### FIELDS FRAME ITEMS PACKING
-        self.scrollableFrame = ScrollableFrame(self.fieldsFrame)
-        self.scrollableFrame.pack(side="top", fill="both", anchor="nw", expand=True)
+        self.scrollable_frame = ScrollableFrame(self.fields_frame)
+        self.scrollable_frame.pack(side="top", fill="both", anchor="nw", expand=True)
 
         ### OUTPUT FIELD ITEMS PACKING
-        self.templateFrame = tk.ttk.Frame(self.controlsFrame)
-        self.loadTemplateBtn = tk.ttk.Button(self.templateFrame, text = i18n.t('translate.loadTemplate'), command = self.add_template)
-        self.clearTemplatesBtn = tk.ttk.Button(self.templateFrame, text = i18n.t('translate.clearTemplates'), command = self.resetTemplates)
-        self.templatesTextBoxLabel = tk.ttk.Label(self.templateFrame, text=i18n.t('translate.loadedTemplates'))
-        self.templatesTextBox = tk.ttk.Entry(self.templateFrame, background="grey")
+        self.template_frame = tk.ttk.Frame(self.controls_frame)
+        self.load_template_btn = tk.ttk.Button(self.template_frame, text = i18n.t('translate.loadTemplate'), command = self.add_template)
+        self.clear_templates_btn = tk.ttk.Button(self.template_frame, text = i18n.t('translate.clearTemplates'), command = self.clear_template_list)
+        self.templates_entry_label = tk.ttk.Label(self.template_frame, text=i18n.t('translate.loadedTemplates'))
+        self.templates_entry = tk.ttk.Entry(self.template_frame, background="grey")
 
-        self.saveFrame = tk.ttk.Frame(self.controlsFrame)
-        self.saveResultsBtn = tk.ttk.Button(self.saveFrame, text = i18n.t('translate.saveResults'), command = self.saveResults)
-        self.saveFileLabel = tk.ttk.Label(self.saveFrame, text=i18n.t('translate.saveName'))
-        self.saveFileStringVar = tk.StringVar()
-        self.saveFileStringVar.set(datetime.datetime.today().strftime('%Y%m%d')[2:] + ' ')
-        self.saveFileEntry = tk.ttk.Entry(self.saveFrame, textvariable=self.saveFileStringVar)
+        self.save_frame = tk.ttk.Frame(self.controls_frame)
+        self.save_results_btn = tk.ttk.Button(self.save_frame, text = i18n.t('translate.saveResults'), command = self.save_generated)
+        self.save_file_label = tk.ttk.Label(self.save_frame, text=i18n.t('translate.saveName'))
+        self.save_file_var = tk.StringVar()
+        self.save_file_var.set(datetime.datetime.today().strftime('%Y%m%d')[2:] + ' ')
+        self.save_file_entry = tk.ttk.Entry(self.save_frame, textvariable=self.save_file_var)
         
-        self.saveFrame.pack(side=tk.TOP, fill="x", padx=5, pady=5)
-        self.saveFileLabel.pack(side=tk.LEFT, fill="x")
-        self.saveFileEntry.pack(side=tk.LEFT, fill="x", expand=True, padx=(0, 5))
-        self.saveResultsBtn.pack(side=tk.LEFT, fill="x", padx=(0, 5))
+        self.save_frame.pack(side=tk.TOP, fill="x", padx=5, pady=5)
+        self.save_file_label.pack(side=tk.LEFT, fill="x")
+        self.save_file_entry.pack(side=tk.LEFT, fill="x", expand=True, padx=(0, 5))
+        self.save_results_btn.pack(side=tk.LEFT, fill="x", padx=(0, 5))
 
-        self.templatesTextBoxLabel.pack(side=tk.LEFT, fill="x")
-        self.templatesTextBox.pack(side=tk.LEFT, fill="x", expand=True, padx=(0, 5))
-        self.loadTemplateBtn.pack(side=tk.LEFT, fill="x", padx=(0, 5))
-        self.clearTemplatesBtn.pack(side=tk.LEFT, fill="x", padx=(0, 5))
-        self.templateFrame.pack(side=tk.TOP, fill="x", padx=5, pady=5)
+        self.templates_entry_label.pack(side=tk.LEFT, fill="x")
+        self.templates_entry.pack(side=tk.LEFT, fill="x", expand=True, padx=(0, 5))
+        self.load_template_btn.pack(side=tk.LEFT, fill="x", padx=(0, 5))
+        self.clear_templates_btn.pack(side=tk.LEFT, fill="x", padx=(0, 5))
+        self.template_frame.pack(side=tk.TOP, fill="x", padx=5, pady=5)
 
         # MENU BAR
-        self.menuBar = tk.Menu(self)
+        self.menubar = tk.Menu(self)
 
-        self.settingsMenu = tk.Menu(self.menuBar, tearoff=0)
-        self.rewriteTemplates = tk.BooleanVar(value=True)
-        self.rewriteExternals = tk.BooleanVar(value=True)
-        self.settingsMenu.add_checkbutton(label=i18n.t('translate.rewriteTemplates'), onvalue=True, offvalue=False, variable=self.rewriteTemplates)
-        self.settingsMenu.add_checkbutton(label=i18n.t('translate.rewriteExternals'), onvalue=True, offvalue=False, variable=self.rewriteExternals)
+        self.settings_menu = tk.Menu(self.menubar, tearoff=0)
+        self.rewrite_templates_var = tk.BooleanVar(value=True)
+        self.rewrite_externals_var = tk.BooleanVar(value=True)
+        self.settings_menu.add_checkbutton(label=i18n.t('translate.rewriteTemplates'), onvalue=True, offvalue=False, variable=self.rewrite_templates_var)
+        self.settings_menu.add_checkbutton(label=i18n.t('translate.rewriteExternals'), onvalue=True, offvalue=False, variable=self.rewrite_externals_var)
 
-        self.menuBar.add_cascade(label=i18n.t('translate.settings'), menu=self.settingsMenu)
+        self.menubar.add_cascade(label=i18n.t('translate.settings'), menu=self.settings_menu)
 
         # WINDOW CONFIG
-        self.config(menu=self.menuBar)
+        self.config(menu=self.menubar)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.update_idletasks()
@@ -106,46 +102,46 @@ class App(tk.Tk):
             template_path = tk.filedialog.Open(self).show()
             if template_path == '':
                 return
-        self.tempgen.loadTemplate(template_path)
-        self.renderEntries(self.tempgen.fields.values(), self.rendered)
-        self.renderTemplateBox()
+        self.tempgen.load_template(template_path)
+        self.render_entries(self.tempgen.fields.values(), self.rendered)
+        self.render_template_list()
     
-    def renderTemplateBox(self):
-        self.templatesTextBox.delete(0, tk.END)
-        self.templatesTextBox.insert(0, ','.join(self.tempgen.templates))
+    def render_template_list(self):
+        self.templates_entry.delete(0, tk.END)
+        self.templates_entry.insert(0, ','.join(self.tempgen.templates))
     
-    def resetTemplates(self):
-        self.tempgen.clearTemplates()
-        self.renderTemplateBox()
-        self.renderEntries(self.tempgen.fields.values(), self.rendered)
+    def clear_template_list(self):
+        self.tempgen.clear_templates()
+        self.render_template_list()
+        self.render_entries(self.tempgen.fields.values(), self.rendered)
 
-    def saveResults(self):
-        generatedFiles = [self.saveFileStringVar.get() + os.path.splitext(template)[1] for template in self.tempgen.templates]
-        filesInDirectory = [path for path in os.listdir(approot) if os.path.isfile(path)]
-        for generatedFile in generatedFiles:
-            if generatedFile in filesInDirectory:
+    def save_generated(self):
+        generated_files = [self.save_file_var.get() + os.path.splitext(template)[1] for template in self.tempgen.templates]
+        directory_files = [path for path in os.listdir(approot) if os.path.isfile(path)]
+        for generated_file in generated_files:
+            if generated_file in directory_files:
                 proceed = tk.messagebox.askyesno(title=i18n.t('translate.replaceTitle'), message=i18n.t('translate.replaceMessage'))
                 if not proceed:
                     return
                 break
         for template in self.tempgen.templates:
-            self.tempgen.save_result(template, self.saveFileStringVar.get(), { key: value['var'].get() for key, value in self.rendered.items() })
-        if (self.rewriteTemplates.get()):
+            self.tempgen.save_result(template, self.save_file_var.get(), { key: value['var'].get() for key, value in self.rendered.items() })
+        if (self.rewrite_templates_var.get()):
             for template in self.tempgen.templates:
-                self.tempgen.save_template(template, { key: value['var'].get() for key, value in self.rendered.items() }, self.rewriteExternals.get())
-            self.reloadExternals()
+                self.tempgen.save_template(template, { key: value['var'].get() for key, value in self.rendered.items() }, self.rewrite_externals_var.get())
+            self.reload_externals()
 
-    def reloadExternals(self):
+    def reload_externals(self):
         self.tempgen.reload_externals()
         for entry in self.rendered.values():
             if self.tempgen.fields.get(entry['id'], {}).get('autocomplete', {}).get('data', None):
                 entry['widget'].suggestions = self.tempgen.fields[entry['id']]['autocomplete']['data']
                 entry['widget'].update()
 
-    def renderEntry(self, value, rendered):
+    def render_entry(self, value, rendered):
         id = value['id']
 
-        container = tk.ttk.Frame(self.scrollableFrame.frame)
+        container = tk.ttk.Frame(self.scrollable_frame.frame)
         container.pack(side=tk.TOP, fill='both', expand=True, padx=5, pady=2.5)
 
         label = tk.ttk.Label(container, text=value.get('title', id))
@@ -160,24 +156,24 @@ class App(tk.Tk):
         if (autocomplete_suggestions):
             rendered[id]['widget'] = AutocompleteEntry(
                 container, autocomplete_suggestions, textvariable=rendered[id]['var'],
-                bounding_container=self.rootFrame,
+                bounding_container=self.root_frame,
                 font=self.default_font,
-                window=self.rootFrame
+                window=self.root_frame
             )
-            oldOnScroll = copy_func(self.scrollableFrame.onScroll)
-            self.scrollableFrame.onScroll = lambda: (oldOnScroll() and False) or rendered[id]['widget'].destroyListBox()
+            old_on_scroll = copy_func(self.scrollable_frame.on_scroll)
+            self.scrollable_frame.on_scroll = lambda: (old_on_scroll() and False) or rendered[id]['widget'].destroy_list_box()
             rendered[id]['widget'].pack(fill=tk.X)
         else:
             rendered[id]['widget'] = tk.ttk.Entry(container, textvariable=rendered[id]['var'])
             rendered[id]['widget'].pack(side=tk.RIGHT, fill="x", expand=True)
 
-    def renderEntries(self, fields, rendered):
+    def render_entries(self, fields, rendered):
         # clear entries container
-        for child in self.scrollableFrame.frame.winfo_children():
+        for child in self.scrollable_frame.frame.winfo_children():
             child.destroy()
         
         # remove scroll listeners
-        self.scrollableFrame.onScroll = lambda: None
+        self.scrollable_frame.on_scroll = lambda: None
 
         # split fields by presense 'group' property into group_specified and group_not_specified
         group_specified, group_not_specified = split_by_property_presense(fields, 'group')
@@ -201,8 +197,8 @@ class App(tk.Tk):
         # render groups separated with separator
         for group in group_specified:
             for value in group:
-                self.renderEntry(value, rendered)
-            separator = tk.ttk.Separator(self.scrollableFrame.frame, orient='horizontal')
+                self.render_entry(value, rendered)
+            separator = tk.ttk.Separator(self.scrollable_frame.frame, orient='horizontal')
             separator.pack(fill='x', pady=10)
         for value in group_not_specified_sorted:
-            self.renderEntry(value, rendered)
+            self.render_entry(value, rendered)
