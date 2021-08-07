@@ -1,0 +1,35 @@
+os: windows           # Windows 10.0.17134 N/A Build 17134
+language: shell       # 'language: python' is an error on Travis CI Windows
+before_install:
+  - choco install python --version 3.6.8
+  - python --version
+  - python -m pip install --upgrade pip
+env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
+
+install:
+  - pip install py2exe
+  - pip install -r requirements.txt
+
+script:
+  - python setup.py py2exe -p lxml,tkinter
+  - mkdir ./artefacts
+  - zip -rDj tempgen.zip ./dist
+  - mv tempgen.zip ./artefacts/tempgen.zip
+
+#script: skip
+
+#before_deploy:
+#  - make install
+#  - make build
+#  - make package
+
+#deploy:
+#  provider: releases
+#  api_key:
+#    secure: $GITHUB_API_KEY
+#  file_glob: true
+#  file: artefacts/*
+#  skip_cleanup: true
+#  on:
+#    tags: true
+
