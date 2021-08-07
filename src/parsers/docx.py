@@ -1,17 +1,17 @@
 import docx
 
 def paragraph_replace_text(paragraph, str, replace_str):
-    """
+    '''
     https://github.com/python-openxml/python-docx/issues/30#issuecomment-881106471
-    """
+    '''
     count = 0
     search_pos = 0
     while paragraph.text.find(str, search_pos) != -1:
-        match = { "start": paragraph.text.find(str, search_pos), "end": paragraph.text.find(str, search_pos) + len(str) }
+        match = { 'start': paragraph.text.find(str, search_pos), 'end': paragraph.text.find(str, search_pos) + len(str) }
         search_pos = match['end']
-        padding = (len(replace_str) - (match["end"] -match['start']) ) *count
+        padding = (len(replace_str) - (match['end'] -match['start']) ) *count
         runs = iter(paragraph.runs)
-        start, end = match['start'] + padding , match["end"] + padding
+        start, end = match['start'] + padding , match['end'] + padding
         for run in runs:
             run_len = len(run.text)
             if start < run_len:
@@ -19,7 +19,7 @@ def paragraph_replace_text(paragraph, str, replace_str):
             start, end = start - run_len, end - run_len
         run_text = run.text
         run_len = len(run_text)
-        run.text = "%s%s%s" % (run_text[:start], replace_str, run_text[end:])
+        run.text = '%s%s%s' % (run_text[:start], replace_str, run_text[end:])
         end -= run_len
         for run in runs:
             if end <= 0:

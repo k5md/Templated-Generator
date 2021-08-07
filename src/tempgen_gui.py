@@ -5,7 +5,6 @@ import itertools
 import datetime
 import i18n
 import locale
-import pycountry
 
 import tkinter.filedialog
 import tkinter.font
