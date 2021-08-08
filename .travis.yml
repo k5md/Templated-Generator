@@ -6,30 +6,19 @@ before_install:
   - python -m pip install --upgrade pip
 env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
 
-install:
-  - pip install py2exe
+script: skip
+
+before_deploy:
   - pip install -r requirements.txt
+  - python build.py
+  - sleep 10
+  - dir -l dist
 
-script:
-  - python setup.py py2exe -p lxml,tkinter
-  - mkdir ./artefacts
-  - zip -rDj tempgen.zip ./dist
-  - mv tempgen.zip ./artefacts/tempgen.zip
-
-#script: skip
-
-#before_deploy:
-#  - make install
-#  - make build
-#  - make package
-
-#deploy:
-#  provider: releases
-#  api_key:
-#    secure: $GITHUB_API_KEY
-#  file_glob: true
-#  file: artefacts/*
-#  skip_cleanup: true
-#  on:
-#    tags: true
-
+deploy:
+  provider: releases
+  api_key: $GITHUB_API_KEY
+  file_glob: true
+  file: TempGen.zip
+  skip_cleanup: true
+  on:
+    tags: true
