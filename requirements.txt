@@ -1,4 +1,4 @@
 python-docx
 python-i18n
 python-i18n[YAML]
-py2exe
+pyinstaller

@@ -118,10 +118,10 @@ Once the project is ready for production, an easy way to create an executable
 is to use [pyinstaller].
 
 1.  Exit a virtual environment if in one (run `deactivate`).
-2.  Install `py2exe` with
+2.  Install `pyinstaller` with
 
     ```sh
-    pip3 install py2exe
+    pip3 install pyinstaller
     ```
 
 3.  Enter the virtual environment (run `source .env/bin/activate` or OS/shell
@@ -129,7 +129,7 @@ is to use [pyinstaller].
 4.  Run the following command to create a binary file in src/tempgen/dist
 
     ```sh
-    python setup.py py2exe -p lxml,tkinter
+    python setup.py
     ```
 
 
