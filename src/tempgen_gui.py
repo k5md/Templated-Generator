@@ -5,6 +5,7 @@ import itertools
 import datetime
 import i18n
 import locale
+import json
 
 import tkinter.filedialog
 import tkinter.font
@@ -26,6 +27,7 @@ except NameError:  # We are the main py2exe script, not a module
 
 LOCALES_PATH=os.path.join(approot, 'locales')
 DEFAULT_TEMPLATE_FILENAME = 'template'
+CONFIG_FILENAME = 'config.json'
 
 class App(tk.Tk):
     def __init__(self):
@@ -33,7 +35,14 @@ class App(tk.Tk):
 
         i18n.load_path.append(LOCALES_PATH)
         i18n.set('fallback', 'en')
-        i18n.set('locale', locale.getlocale()[0][0:2].lower())   
+        i18n.set('locale', locale.getlocale()[0][0:2].lower())
+
+        ### LOAD CONFIG
+        self.settings = {
+            'rewrite_templates_var': tk.BooleanVar(value=True),
+            'rewrite_externals_var': tk.BooleanVar(value=True),
+        }
+        self.load_settings(CONFIG_FILENAME, self.settings)
 
         ### FRAMES
         self.root_frame = tk.ttk.Frame(self)
@@ -82,8 +91,8 @@ class App(tk.Tk):
         self.settings_menu = tk.Menu(self.menubar, tearoff=0)
         self.rewrite_templates_var = tk.BooleanVar(value=True)
         self.rewrite_externals_var = tk.BooleanVar(value=True)
-        self.settings_menu.add_checkbutton(label=i18n.t('translate.rewriteTemplates'), onvalue=True, offvalue=False, variable=self.rewrite_templates_var)
-        self.settings_menu.add_checkbutton(label=i18n.t('translate.rewriteExternals'), onvalue=True, offvalue=False, variable=self.rewrite_externals_var)
+        self.settings_menu.add_checkbutton(label=i18n.t('translate.rewriteTemplates'), onvalue=True, offvalue=False, variable=self.settings['rewrite_templates_var'], command=self.save_settings)
+        self.settings_menu.add_checkbutton(label=i18n.t('translate.rewriteExternals'), onvalue=True, offvalue=False, variable=self.settings['rewrite_externals_var'], command=self.save_settings)
 
         self.menubar.add_cascade(label=i18n.t('translate.settings'), menu=self.settings_menu)
 
@@ -100,6 +109,7 @@ class App(tk.Tk):
         self.rendered = {}
         for template in [os.path.abspath(path) for path in os.listdir(approot) if os.path.isfile(path) and DEFAULT_TEMPLATE_FILENAME in path]:
             self.add_template(template)
+
     
     def add_template(self, template_path = ''):
         if (not template_path):
@@ -134,6 +144,23 @@ class App(tk.Tk):
             for template in self.tempgen.get_templates():
                 self.tempgen.save_template(template, { key: value['var'].get() for key, value in self.rendered.items() }, self.rewrite_externals_var.get())
             self.reload_externals()
+    
+    def load_settings(self, file_name, container):
+        if file_name in os.listdir(approot) and os.path.isfile(file_name):
+            file_path = os.path.abspath(file_name)
+            with open(file_path, 'r', encoding='utf-8') as file:
+                content = file.read()
+                payload = json.loads(content)
+                for key in container.keys():
+                    if key in payload:
+                        container[key].set(payload[key])
+        return container
+
+    def save_settings(self, file_name = CONFIG_FILENAME):
+        payload = { k: v.get() for k, v in self.settings.items() }
+        file_path = os.path.abspath(file_name)
+        with open(file_path, 'w', encoding='utf-8') as file:
+            json.dump(payload, file, ensure_ascii=False)
 
     def reload_externals(self):
         self.tempgen.reload_externals()
