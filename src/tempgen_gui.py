@@ -116,6 +116,20 @@ class App(tk.Tk):
         for template in [os.path.abspath(path) for path in os.listdir(approot) if os.path.isfile(path) and DEFAULT_TEMPLATE_FILENAME in path]:
             self.add_template(template)
 
+        # NOTE: quick workaround for issue with cyrillic layouts control sequences
+        self.bind_all("<Key>", self._onKeyRelease, "+")
+
+    def _onKeyRelease(self, event):
+        ctrl = (event.state & 0x4) != 0
+        if event.keycode==88 and ctrl and event.keysym.lower() != "x": 
+            event.widget.event_generate("<<Cut>>")
+
+        if event.keycode==86 and ctrl and event.keysym.lower() != "v": 
+            event.widget.event_generate("<<Paste>>")
+
+        if event.keycode==67 and ctrl and event.keysym.lower() != "c":
+            event.widget.event_generate("<<Copy>>")   
+
     def ask_templates(self):
         template_paths = tk.filedialog.Open(self, multiple=True).show()
         if template_paths == '' or not len(template_paths):
