@@ -66,20 +66,23 @@ class App(tk.Tk):
         self.load_template_btn = tk.ttk.Button(self.template_frame, text = i18n.t('translate.loadTemplate'), command = self.ask_templates)
         self.clear_templates_btn = tk.ttk.Button(self.template_frame, text = i18n.t('translate.clearTemplates'), command = self.clear_template_list)
         self.templates_entry_label = tk.ttk.Label(self.template_frame, text=i18n.t('translate.loadedTemplates'))
-        self.templates_entry = tk.ttk.Entry(self.template_frame, background='grey')
+        self.templates_entry = tk.ttk.Entry(self.template_frame, state='readonly', background='grey')
 
         self.save_frame = tk.ttk.Frame(self.controls_frame)
-        self.save_results_btn = tk.ttk.Button(self.save_frame, text = i18n.t('translate.saveResults'), command = self.save_generated)
+        self.save_folder_label = tk.ttk.Label(self.save_frame, text=i18n.t('translate.saveFolder'))
+        self.save_folder_entry = tk.ttk.Entry(self.save_frame, textvariable=self.settings['save_folder'], state='readonly')
+        self.save_folder_btn = tk.ttk.Button(self.save_frame, text = i18n.t('translate.select'), command = self.set_save_folder)
         self.save_file_label = tk.ttk.Label(self.save_frame, text=i18n.t('translate.saveName'))
-        self.save_file_var = tk.StringVar()
-        self.save_file_var.set(datetime.datetime.today().strftime('%Y%m%d')[2:] + ' ')
+        self.save_file_var = tk.StringVar(value=datetime.datetime.today().strftime('%Y%m%d')[2:] + ' ')
         self.save_file_entry = tk.ttk.Entry(self.save_frame, textvariable=self.save_file_var)
-        self.save_folder_btn = tk.ttk.Button(self.save_frame, text = i18n.t('translate.saveFolder'), command = self.set_save_folder)
+        self.save_results_btn = tk.ttk.Button(self.save_frame, text = i18n.t('translate.saveResults'), command = self.save_generated)
         
         self.save_frame.pack(side=tk.TOP, fill='x', padx=5, pady=5)
-        self.save_file_label.pack(side=tk.LEFT, fill='x')
-        self.save_file_entry.pack(side=tk.LEFT, fill='x', expand=True, padx=(0, 5))
+        self.save_folder_label.pack(side=tk.LEFT, fill='x', padx=(0, 5))
+        self.save_folder_entry.pack(side=tk.LEFT, fill='x', padx=(0, 5), expand=True)
         self.save_folder_btn.pack(side=tk.LEFT, fill='x', padx=(0, 5))
+        self.save_file_label.pack(side=tk.LEFT, fill='x', padx=(0, 5))
+        self.save_file_entry.pack(side=tk.LEFT, fill='x', expand=True, padx=(0, 5))
         self.save_results_btn.pack(side=tk.LEFT, fill='x', padx=(0, 5))
 
         self.templates_entry_label.pack(side=tk.LEFT, fill='x')
@@ -87,7 +90,7 @@ class App(tk.Tk):
         self.load_template_btn.pack(side=tk.LEFT, fill='x', padx=(0, 5))
         self.clear_templates_btn.pack(side=tk.LEFT, fill='x', padx=(0, 5))
         self.template_frame.pack(side=tk.TOP, fill='x', padx=5, pady=5)
-
+        
         # MENU BAR
         self.menubar = tk.Menu(self)
 
@@ -126,8 +129,10 @@ class App(tk.Tk):
         self.render_template_list()
     
     def render_template_list(self):
+        self.templates_entry.config(state='normal')
         self.templates_entry.delete(0, tk.END)
         self.templates_entry.insert(0, ','.join(self.tempgen.get_templates()))
+        self.templates_entry.config(state='readonly')
     
     def clear_template_list(self):
         self.tempgen.clear_templates()
