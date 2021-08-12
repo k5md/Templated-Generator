@@ -123,3 +123,9 @@ class Tempgen():
                 if type(autocomplete) is dict and autocomplete.get('external'):
                     external = self.load_external(autocomplete.get('external'))
                     self.fields[entry['id']]['autocomplete']['data'] = external
+
+    def get_templates(self):
+        return self.templates
+    
+    def get_fields(self):
+        return self.fields

@@ -107,20 +107,20 @@ class App(tk.Tk):
             if template_path == '':
                 return
         self.tempgen.load_template(template_path)
-        self.render_entries(self.tempgen.fields.values(), self.rendered)
+        self.render_entries(self.tempgen.get_fields().values(), self.rendered)
         self.render_template_list()
     
     def render_template_list(self):
         self.templates_entry.delete(0, tk.END)
-        self.templates_entry.insert(0, ','.join(self.tempgen.templates))
+        self.templates_entry.insert(0, ','.join(self.tempgen.get_templates()))
     
     def clear_template_list(self):
         self.tempgen.clear_templates()
         self.render_template_list()
-        self.render_entries(self.tempgen.fields.values(), self.rendered)
+        self.render_entries(self.tempgen.get_fields().values(), self.rendered)
 
     def save_generated(self):
-        generated_files = [self.save_file_var.get() + os.path.splitext(template)[1] for template in self.tempgen.templates]
+        generated_files = [self.save_file_var.get() + os.path.splitext(template)[1] for template in self.tempgen.get_templates()]
         directory_files = [path for path in os.listdir(approot) if os.path.isfile(path)]
         for generated_file in generated_files:
             if generated_file in directory_files:
@@ -128,18 +128,18 @@ class App(tk.Tk):
                 if not proceed:
                     return
                 break
-        for template in self.tempgen.templates:
+        for template in self.tempgen.get_templates():
             self.tempgen.save_result(template, self.save_file_var.get(), { key: value['var'].get() for key, value in self.rendered.items() })
         if (self.rewrite_templates_var.get()):
-            for template in self.tempgen.templates:
+            for template in self.tempgen.get_templates():
                 self.tempgen.save_template(template, { key: value['var'].get() for key, value in self.rendered.items() }, self.rewrite_externals_var.get())
             self.reload_externals()
 
     def reload_externals(self):
         self.tempgen.reload_externals()
         for entry in self.rendered.values():
-            if self.tempgen.fields.get(entry['id'], {}).get('autocomplete', {}).get('data', None):
-                entry['widget'].suggestions = self.tempgen.fields[entry['id']]['autocomplete']['data']
+            if self.tempgen.get_fields().get(entry['id'], {}).get('autocomplete', {}).get('data', None):
+                entry['widget'].suggestions = self.tempgen.get_fields()[entry['id']]['autocomplete']['data']
                 entry['widget'].update()
 
     def render_entry(self, value, rendered):
