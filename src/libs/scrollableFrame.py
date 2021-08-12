@@ -8,7 +8,7 @@ class ScrollableFrame(ttk.Frame):
 
         self.on_scroll = lambda *args, **kwargs: None
 
-        self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scrollbar = AutoScrollbar(self, orient="vertical", command=self.canvas.yview)
         self.frame = ttk.Frame(self.canvas)
 
         self.frame.bind("<Configure>", self.on_frame_configure)
@@ -30,3 +30,11 @@ class ScrollableFrame(ttk.Frame):
     def on_scroll_command(self, *args, **kwargs):
         self.on_scroll()
         self.scrollbar.set(*args, **kwargs)
+
+class AutoScrollbar(ttk.Scrollbar):
+    def set(self, low, high):
+        if float(low) <= 0.0 and float(high) >= 1.0:
+            self.pack_forget()
+        else:
+            self.pack(side="right", fill="y")
+        ttk.Scrollbar.set(self, low, high)
