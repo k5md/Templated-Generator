@@ -48,7 +48,7 @@ def parse(path, container, parse_entry, find_matches):
     for p in paragraphs:
         matches = find_matches(p.text)
         for match in matches:
-            payload = parse_entry(match)
+            payload = parse_entry(match, path)
             container[payload['id']] = payload
 
 def replace(source_path, target_path, compute_match, replacements, update_external = False):
@@ -63,6 +63,6 @@ def replace(source_path, target_path, compute_match, replacements, update_extern
                 for p in cell.paragraphs:
                     paragraphs.append(p)
     for p in paragraphs:
-        compute_match(p.text, to_replace, replacements, update_external)
+        compute_match(p.text, to_replace, replacements, source_path, update_external)
         replace_in_paragraph(p, to_replace)
     doc.save(target_path)

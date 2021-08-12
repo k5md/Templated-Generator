@@ -34,21 +34,26 @@ class Tempgen():
         self.templates = []
         self.fields = {}
 
-    def load_external(self, file_name):
-        if file_name in os.listdir(approot) and os.path.isfile(file_name):
-            file_path = os.path.abspath(file_name)
+    def load_external(self, file_name, template_path):
+        print('loading external', template_path)
+        template_dir, _ = os.path.split(template_path)
+        file_path = os.path.join(template_dir, file_name)
+        print('loading external', file_path)
+        if os.path.isfile(file_path):
             with open(file_path, 'r', encoding='utf-8') as file:
                 content = file.read()
                 payload = json.loads(content)
                 return payload
     
-    def save_external(self, file_name, payload):
-        if file_name in os.listdir(approot) and os.path.isfile(file_name):
-            file_path = os.path.abspath(file_name)
-            with open(file_path, 'w', encoding='utf-8') as file:
-                json.dump(payload, file, ensure_ascii=False)
+    def save_external(self, file_name, payload, template_path):
+        template_dir, _ = os.path.split(template_path)
+        file_path = os.path.join(template_dir, file_name)
+        print('saving external', file_path)
+        with open(file_path, 'w', encoding='utf-8') as file:
+            json.dump(payload, file, ensure_ascii=False)
 
     def save_result(self, template_path, target_name, replacements):
+        print('save result', template_path)
         name, ext = os.path.splitext(template_path)
         if not (ext in ext_parser_map.keys()):
             return
@@ -71,7 +76,7 @@ class Tempgen():
             update_externals
         )
 
-    def parse_entry(self, string):
+    def parse_entry(self, string, template_path):
         content = string[2:-2]
         payload = {}
         payload = json.loads(content)
@@ -82,14 +87,15 @@ class Tempgen():
         autocomplete = payload.get('autocomplete')
         if autocomplete:
             if type(autocomplete) is dict and autocomplete.get('external'):
-                external = self.load_external(autocomplete.get('external'))
+                print('in parse_entry', template_path)
+                external = self.load_external(autocomplete.get('external'), template_path)
                 payload['autocomplete']['data'] = external
         return payload
 
-    def compute_match(self, text, to_replace, replacements, *args, **kwargs): # find matches, populate to_replace, return to_replace
+    def compute_match(self, text, to_replace, replacements, template_path, *args, **kwargs): # find matches, populate to_replace, return to_replace
         matches = self.find_matches(text)
         for match in matches:
-            payload = self.parse_entry(match)
+            payload = self.parse_entry(match, template_path)
             value = replacements[payload['id']]
             if 'fn' in payload:
                 if payload['fn'] in name_transform_map:
@@ -101,27 +107,27 @@ class Tempgen():
             to_replace[match] = value
         return to_replace
 
-    def compute_updated_template(self, text, to_replace, replacements, update_externals): # find matches, populate to_replace, return to_replace
+    def compute_updated_template(self, text, to_replace, replacements, template_path, update_externals): # find matches, populate to_replace, return to_replace
         matches = self.find_matches(text)
         for match in matches:
-            payload = self.parse_entry(match)
+            payload = self.parse_entry(match, template_path)
             newValue = replacements[payload['id']]
             payload['value'] = newValue
             if (update_externals):
                 if payload.get('autocomplete') and payload.get('autocomplete', {}).get('data'):
                     if newValue not in payload['autocomplete']['data']:
-                        payload['autocomplete']['data'].append(newValue) 
-                        self.save_external(payload['autocomplete']['external'], payload['autocomplete']['data'])
+                        payload['autocomplete']['data'].append(newValue)
+                        self.save_external(payload['autocomplete']['external'], payload['autocomplete']['data'], template_path)
                     del payload['autocomplete']['data']
             to_replace[match] = '{{' + json.dumps(payload, ensure_ascii=False) + '}}'
         return to_replace  
 
-    def reload_externals(self):
+    def reload_externals(self, template_path):
         for entry in self.fields.values():
             autocomplete = entry.get('autocomplete')
             if autocomplete:
                 if type(autocomplete) is dict and autocomplete.get('external'):
-                    external = self.load_external(autocomplete.get('external'))
+                    external = self.load_external(autocomplete.get('external'), template_path)
                     self.fields[entry['id']]['autocomplete']['data'] = external
 
     def get_templates(self):

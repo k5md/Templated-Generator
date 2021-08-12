@@ -41,6 +41,7 @@ class App(tk.Tk):
         self.settings = {
             'rewrite_templates_var': tk.BooleanVar(value=True),
             'rewrite_externals_var': tk.BooleanVar(value=True),
+            'save_folder': tk.StringVar(value=approot)
         }
         self.load_settings(CONFIG_FILENAME, self.settings)
 
@@ -73,10 +74,12 @@ class App(tk.Tk):
         self.save_file_var = tk.StringVar()
         self.save_file_var.set(datetime.datetime.today().strftime('%Y%m%d')[2:] + ' ')
         self.save_file_entry = tk.ttk.Entry(self.save_frame, textvariable=self.save_file_var)
+        self.save_folder_btn = tk.ttk.Button(self.save_frame, text = i18n.t('translate.saveFolder'), command = self.set_save_folder)
         
         self.save_frame.pack(side=tk.TOP, fill='x', padx=5, pady=5)
         self.save_file_label.pack(side=tk.LEFT, fill='x')
         self.save_file_entry.pack(side=tk.LEFT, fill='x', expand=True, padx=(0, 5))
+        self.save_folder_btn.pack(side=tk.LEFT, fill='x', padx=(0, 5))
         self.save_results_btn.pack(side=tk.LEFT, fill='x', padx=(0, 5))
 
         self.templates_entry_label.pack(side=tk.LEFT, fill='x')
@@ -110,7 +113,6 @@ class App(tk.Tk):
         for template in [os.path.abspath(path) for path in os.listdir(approot) if os.path.isfile(path) and DEFAULT_TEMPLATE_FILENAME in path]:
             self.add_template(template)
 
-    
     def add_template(self, template_path = ''):
         if (not template_path):
             template_path = tk.filedialog.Open(self).show()
@@ -130,8 +132,8 @@ class App(tk.Tk):
         self.render_entries(self.tempgen.get_fields().values(), self.rendered)
 
     def save_generated(self):
-        generated_files = [self.save_file_var.get() + os.path.splitext(template)[1] for template in self.tempgen.get_templates()]
-        directory_files = [path for path in os.listdir(approot) if os.path.isfile(path)]
+        generated_files = [os.path.join(self.settings['save_folder'].get(), self.save_file_var.get() + os.path.splitext(template)[1]) for template in self.tempgen.get_templates()]
+        directory_files = [path for path in os.listdir(self.settings['save_folder'].get()) if os.path.isfile(path)]
         for generated_file in generated_files:
             if generated_file in directory_files:
                 proceed = tk.messagebox.askyesno(title=i18n.t('translate.replaceTitle'), message=i18n.t('translate.replaceMessage'))
@@ -139,11 +141,11 @@ class App(tk.Tk):
                     return
                 break
         for template in self.tempgen.get_templates():
-            self.tempgen.save_result(template, self.save_file_var.get(), { key: value['var'].get() for key, value in self.rendered.items() })
+            self.tempgen.save_result(template, os.path.join(self.settings['save_folder'].get(), self.save_file_var.get()), { key: value['var'].get() for key, value in self.rendered.items() })
         if (self.rewrite_templates_var.get()):
             for template in self.tempgen.get_templates():
                 self.tempgen.save_template(template, { key: value['var'].get() for key, value in self.rendered.items() }, self.rewrite_externals_var.get())
-            self.reload_externals()
+                self.reload_externals(template)
     
     def load_settings(self, file_name, container):
         if file_name in os.listdir(approot) and os.path.isfile(file_name):
@@ -162,12 +164,19 @@ class App(tk.Tk):
         with open(file_path, 'w', encoding='utf-8') as file:
             json.dump(payload, file, ensure_ascii=False)
 
-    def reload_externals(self):
-        self.tempgen.reload_externals()
+    def reload_externals(self, template_path):
+        self.tempgen.reload_externals(template_path)
         for entry in self.rendered.values():
             if self.tempgen.get_fields().get(entry['id'], {}).get('autocomplete', {}).get('data', None):
                 entry['widget'].suggestions = self.tempgen.get_fields()[entry['id']]['autocomplete']['data']
                 entry['widget'].update()
+
+    def set_save_folder(self):
+        save_folder = tk.filedialog.askdirectory()
+        if save_folder == '':
+            return
+        self.settings['save_folder'].set(save_folder)
+        self.save_settings()
 
     def render_entry(self, value, rendered):
         id = value['id']

@@ -4,6 +4,7 @@ en:
   loadTemplate: 'Load template'
   clearTemplates: 'Clear templates'
   saveResults: 'Save'
+  saveFolder: 'Select output folder'
   saveName: 'File name:'
   loadedTemplates: 'Active templates:'
   replaceTitle: 'Confirmation'

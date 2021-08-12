@@ -4,6 +4,7 @@ ru:
   loadTemplate: 'Загрузить шаблон'
   clearTemplates: 'Очистить'
   saveResults: 'Сохранить'
+  saveFolder: 'Выбрать папку для сохранения'
   saveName: 'Имя файла:'
   loadedTemplates: 'Загруженные шаблоны:'
   replaceTitle: 'Подтверждение'
