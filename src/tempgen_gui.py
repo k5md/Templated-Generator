@@ -63,7 +63,7 @@ class App(tk.Tk):
 
         ### OUTPUT FIELD ITEMS PACKING
         self.template_frame = tk.ttk.Frame(self.controls_frame)
-        self.load_template_btn = tk.ttk.Button(self.template_frame, text = i18n.t('translate.loadTemplate'), command = self.add_template)
+        self.load_template_btn = tk.ttk.Button(self.template_frame, text = i18n.t('translate.loadTemplate'), command = self.ask_templates)
         self.clear_templates_btn = tk.ttk.Button(self.template_frame, text = i18n.t('translate.clearTemplates'), command = self.clear_template_list)
         self.templates_entry_label = tk.ttk.Label(self.template_frame, text=i18n.t('translate.loadedTemplates'))
         self.templates_entry = tk.ttk.Entry(self.template_frame, background='grey')
@@ -113,11 +113,14 @@ class App(tk.Tk):
         for template in [os.path.abspath(path) for path in os.listdir(approot) if os.path.isfile(path) and DEFAULT_TEMPLATE_FILENAME in path]:
             self.add_template(template)
 
+    def ask_templates(self):
+        template_paths = tk.filedialog.Open(self, multiple=True).show()
+        if template_paths == '' or not len(template_paths):
+            return
+        for template_path in template_paths:
+            self.add_template(template_path)
+
     def add_template(self, template_path = ''):
-        if (not template_path):
-            template_path = tk.filedialog.Open(self).show()
-            if template_path == '':
-                return
         self.tempgen.load_template(template_path)
         self.render_entries(self.tempgen.get_fields().values(), self.rendered)
         self.render_template_list()
