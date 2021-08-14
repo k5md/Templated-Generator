@@ -35,10 +35,8 @@ class Tempgen():
         self.fields = {}
 
     def load_external(self, file_name, template_path):
-        print('loading external', template_path)
         template_dir, _ = os.path.split(template_path)
         file_path = os.path.join(template_dir, file_name)
-        print('loading external', file_path)
         if os.path.isfile(file_path):
             with open(file_path, 'r', encoding='utf-8') as file:
                 content = file.read()
@@ -48,12 +46,10 @@ class Tempgen():
     def save_external(self, file_name, payload, template_path):
         template_dir, _ = os.path.split(template_path)
         file_path = os.path.join(template_dir, file_name)
-        print('saving external', file_path)
         with open(file_path, 'w', encoding='utf-8') as file:
             json.dump(payload, file, ensure_ascii=False)
 
     def save_result(self, template_path, target_name, replacements):
-        print('save result', template_path)
         name, ext = os.path.splitext(template_path)
         if not (ext in ext_parser_map.keys()):
             return
@@ -87,7 +83,6 @@ class Tempgen():
         autocomplete = payload.get('autocomplete')
         if autocomplete:
             if type(autocomplete) is dict and autocomplete.get('external'):
-                print('in parse_entry', template_path)
                 external = self.load_external(autocomplete.get('external'), template_path)
                 payload['autocomplete']['data'] = external
         return payload
