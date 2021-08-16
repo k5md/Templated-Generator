@@ -95,8 +95,6 @@ class App(tk.Tk):
         self.menubar = tk.Menu(self)
 
         self.settings_menu = tk.Menu(self.menubar, tearoff=0)
-        self.rewrite_templates_var = tk.BooleanVar(value=True)
-        self.rewrite_externals_var = tk.BooleanVar(value=True)
         self.settings_menu.add_checkbutton(label=i18n.t('translate.rewriteTemplates'), onvalue=True, offvalue=False, variable=self.settings['rewrite_templates_var'], command=self.save_settings)
         self.settings_menu.add_checkbutton(label=i18n.t('translate.rewriteExternals'), onvalue=True, offvalue=False, variable=self.settings['rewrite_externals_var'], command=self.save_settings)
 
@@ -164,9 +162,9 @@ class App(tk.Tk):
                 break
         for template in self.tempgen.get_templates():
             self.tempgen.save_result(template, os.path.join(self.settings['save_folder'].get(), self.save_file_var.get()), { key: value['var'].get() for key, value in self.rendered.items() })
-        if (self.rewrite_templates_var.get()):
+        if (self.settings['rewrite_templates_var'].get()):
             for template in self.tempgen.get_templates():
-                self.tempgen.save_template(template, { key: value['var'].get() for key, value in self.rendered.items() }, self.rewrite_externals_var.get())
+                self.tempgen.save_template(template, { key: value['var'].get() for key, value in self.rendered.items() }, self.settings['rewrite_externals_var'].get())
                 self.reload_externals(template)
     
     def load_settings(self, file_name, container):

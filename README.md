@@ -133,6 +133,14 @@ is to use [pyinstaller].
     ```
 
 
+```sh
+pytest
+```
+
+```sh
+pytest --snapshot-update
+```
+
 
 [GitHub]: https://github.com/
 [pyinstaller]: http://www.pyinstaller.org/

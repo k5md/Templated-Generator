@@ -1,3 +1,4 @@
+odfpy
 python-docx
 python-i18n
 python-i18n[YAML]
