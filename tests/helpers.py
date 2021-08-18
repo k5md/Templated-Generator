@@ -1,65 +1,50 @@
 from zipfile import ZipFile, ZIP_DEFLATED
 import xml.etree.ElementTree as ET
 import shutil
+from src.utils import extract_zip
 
-class PlaintextExtension():
+class BaseTextExtension():
+    def __init__(self, text = ''):
+        self.text = text
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(\n{self.text}\n)"
+
+class PlaintextExtension(BaseTextExtension):
     def __init__(self, file_path):
+        super().__init__()
         with open(file_path, 'r', encoding='utf-8') as file:
             self.text = str(file.read())
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}(\n{self.text}\n)"
-
-class DocxExtension():
+class DocxExtension(BaseTextExtension):
     def __init__(self, file_path):
+        super().__init__()
         temp_path = file_path + '_temp'
-        with ZipFile(file_path, 'r') as zipObj:
-            listOfFileNames = zipObj.namelist()
-            for fileName in listOfFileNames:
-                zipObj.extract(fileName, temp_path)
-        
+        extract_zip(file_path, temp_path)
         tree = ET.parse('\\'.join([temp_path, 'word', 'document.xml']))
         xmlstr = ET.tostring(tree.getroot(), encoding='utf-8', method='xml')
-        root = tree.getroot()
         self.text = xmlstr
         shutil.rmtree(temp_path)
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}(\n{self.text}\n)"
-
-class XlsxExtension():
+class XlsxExtension(BaseTextExtension):
     def __init__(self, file_path):
+        super().__init__()
         temp_path = file_path + '_temp'
-        with ZipFile(file_path, 'r') as zipObj:
-            listOfFileNames = zipObj.namelist()
-            for fileName in listOfFileNames:
-                zipObj.extract(fileName, temp_path)
-            
+        extract_zip(file_path, temp_path)
         tree = ET.parse('\\'.join([temp_path, 'xl', 'sharedStrings.xml']))
         xmlstr = ET.tostring(tree.getroot(), encoding='utf-8', method='xml')
-        root = tree.getroot()
         self.text = xmlstr
         shutil.rmtree(temp_path)
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}(\n{self.text}\n)"
-
-class OdfExtension():
+class OdfExtension(BaseTextExtension):
     def __init__(self, file_path):
+        super().__init__()
         temp_path = file_path + '_temp'
-        with ZipFile(file_path, 'r') as zipObj:
-            listOfFileNames = zipObj.namelist()
-            for fileName in listOfFileNames:
-                zipObj.extract(fileName, temp_path)
-            
+        extract_zip(file_path, temp_path)
         tree = ET.parse('\\'.join([temp_path, 'content.xml']))
         xmlstr = ET.tostring(tree.getroot(), encoding='utf-8', method='xml')
-        root = tree.getroot()
         self.text = xmlstr
         shutil.rmtree(temp_path)
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}(\n{self.text}\n)"
 
 ext_serializer_map = {
     '.docx': DocxExtension,
