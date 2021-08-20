@@ -1,5 +1,5 @@
 import datetime
-from libs.num2t4ru import decimal2text
+from tempgen.libs.num2t4ru import decimal2text
 
 def ru_dmy():
     month_names = ['', 'января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']

@@ -1,7 +1,7 @@
 import os
 import xml.etree.ElementTree as ET
 import shutil
-from utils import extract_zip, make_zip
+from tempgen.utils import extract_zip, make_zip
 
 def parse(path, container, parse_entry, find_matches):
     temp_path = path + '_temp'

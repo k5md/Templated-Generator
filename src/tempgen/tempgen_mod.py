@@ -4,8 +4,8 @@ import sys
 import re
 import json
 
-from parsers import ext_parser_map
-from transforms import name_transform_map
+from tempgen.parsers import ext_parser_map
+from tempgen.transforms import name_transform_map
 
 try:
     approot = os.path.dirname(os.path.abspath(__file__))

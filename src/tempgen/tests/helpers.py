@@ -2,7 +2,7 @@ import os
 from zipfile import ZipFile, ZIP_DEFLATED
 import xml.etree.ElementTree as ET
 import shutil
-from src.utils import extract_zip
+from tempgen.utils import extract_zip
 
 class BaseTextExtension():
     def __init__(self, text = ''):

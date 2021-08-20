@@ -2,10 +2,10 @@ import pytest
 import os
 import os
 from collections import defaultdict
-from src.tempgen import Tempgen
-from src.parsers import ext_parser_map
 from syrupy.extensions.single_file import SingleFileSnapshotExtension
-from helpers import ext_serializer_map
+from tempgen.tempgen_mod import Tempgen
+from tempgen.parsers import ext_parser_map
+from tempgen.tests.helpers import ext_serializer_map
 
 tests_dir = os.path.dirname(os.path.abspath(__file__))
 fixture_dir = os.path.join(tests_dir, 'fixtures')

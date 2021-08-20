@@ -13,10 +13,10 @@ import tkinter.ttk
 import tkinter.messagebox
 import tkinter as tk
 
-from libs.scrollableFrame import ScrollableFrame
-from libs.autocompleteEntry import AutocompleteEntry
-from utils import split_by_property_presense, copy_func, make_path
-from tempgen import Tempgen
+from tempgen.libs.scrollableFrame import ScrollableFrame
+from tempgen.libs.autocompleteEntry import AutocompleteEntry
+from tempgen.utils import split_by_property_presense, copy_func, make_path
+from tempgen.tempgen_mod import Tempgen
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -27,7 +27,7 @@ except NameError:  # We are the main py2exe script, not a module
 
 LOCALES_PATH=os.path.join(approot, 'locales')
 DEFAULT_TEMPLATE_FILENAME = 'template'
-CONFIG_FILENAME = 'config.json'
+CONFIG_FILEPATH = os.path.join(approot, 'config.json')
 
 class App(tk.Tk):
     def __init__(self):
@@ -43,7 +43,7 @@ class App(tk.Tk):
             'rewrite_externals_var': tk.BooleanVar(value=True),
             'save_folder': tk.StringVar(value=approot)
         }
-        self.load_settings(CONFIG_FILENAME, self.settings)
+        self.load_settings(CONFIG_FILEPATH, self.settings)
 
         ### FRAMES
         self.root_frame = tk.ttk.Frame(self)
@@ -167,9 +167,8 @@ class App(tk.Tk):
                 self.tempgen.save_template(template, { key: value['var'].get() for key, value in self.rendered.items() }, self.settings['rewrite_externals_var'].get())
                 self.reload_externals(template)
     
-    def load_settings(self, file_name, container):
-        if file_name in os.listdir(approot) and os.path.isfile(file_name):
-            file_path = os.path.abspath(file_name)
+    def load_settings(self, file_path, container):
+        if os.path.exists(file_path) and os.path.isfile(file_path):
             with open(file_path, 'r', encoding='utf-8') as file:
                 content = file.read()
                 payload = json.loads(content)
@@ -178,9 +177,8 @@ class App(tk.Tk):
                         container[key].set(payload[key])
         return container
 
-    def save_settings(self, file_name = CONFIG_FILENAME):
+    def save_settings(self, file_path = CONFIG_FILEPATH):
         payload = { k: v.get() for k, v in self.settings.items() }
-        file_path = os.path.abspath(file_name)
         with open(file_path, 'w', encoding='utf-8') as file:
             json.dump(payload, file, ensure_ascii=False)
 

@@ -2,8 +2,9 @@ import os
 import sys
 import argparse
 import json
-from tempgen_gui import App
-from tempgen import Tempgen
+
+from tempgen.tempgen_gui import App
+from tempgen.tempgen_mod import Tempgen
 
 if len(sys.argv) == 1:
     app = App()
@@ -48,12 +49,12 @@ args = parser.parse_args()
 templates = [ os.sep.join([os.getcwd(), template]) if not os.path.isabs(template) else template for template in args.templates]
 replacements = args.replacements or {}
 actions = []
-tempgen = Tempgen()
+tempgen_instance = Tempgen()
 
 for template in templates:
-    actions.append(lambda: tempgen.load_template(template))
-    actions.append(lambda: tempgen.save_result(template, args.output, replacements))
+    actions.append(lambda: tempgen_instance.load_template(template))
+    actions.append(lambda: tempgen_instance.save_result(template, args.output, replacements))
     if args.update_templates:
-        actions.append(lambda: tempgen.save_template(template, replacements, args.update_externals))
+        actions.append(lambda: tempgen_instance.save_template(template, replacements, args.update_externals))
 for action in actions:
     action()
