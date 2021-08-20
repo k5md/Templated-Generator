@@ -1,9 +1,7 @@
 import os
-import re
-from zipfile import ZipFile, ZIP_DEFLATED
 import xml.etree.ElementTree as ET
 import shutil
-from src.utils import extract_zip, make_zip
+from utils import extract_zip, make_zip
 
 def parse(path, container, parse_entry, find_matches):
     temp_path = path + '_temp'
@@ -26,7 +24,6 @@ def replace(source_path, target_path, compute_match, replacements, update_extern
         shutil.rmtree(temp_path)
     except Exception as e:
         pass
-    lastPortion = temp_path.split('\\')[-1] # relative path for zipf arcname construction
     extract_zip(source_path, temp_path)
         
     ET.register_namespace('','http://schemas.openxmlformats.org/spreadsheetml/2006/main')

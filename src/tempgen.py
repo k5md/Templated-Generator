@@ -91,7 +91,7 @@ class Tempgen():
         matches = self.find_matches(text)
         for match in matches:
             payload = self.parse_entry(match, template_path)
-            value = replacements[payload['id']]
+            value = replacements.get(payload['id'], payload['value'])
             if 'fn' in payload:
                 if payload['fn'] in name_transform_map:
                     value = name_transform_map[payload['fn']](value)
@@ -106,7 +106,7 @@ class Tempgen():
         matches = self.find_matches(text)
         for match in matches:
             payload = self.parse_entry(match, template_path)
-            newValue = replacements[payload['id']]
+            newValue = replacements.get(payload['id'], payload['value'])
             payload['value'] = newValue
             if (update_externals):
                 if payload.get('autocomplete') and payload.get('autocomplete', {}).get('data'):
