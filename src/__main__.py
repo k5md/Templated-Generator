@@ -8,9 +8,9 @@ from tempgen import Tempgen
 if len(sys.argv) == 1:
     app = App()
     app.mainloop()
+    sys.exit(0)
 
 parser = argparse.ArgumentParser(description = 'Generate files from templates with template entries replaced')
-
 parser.add_argument(
     '--input',
     dest='templates',
@@ -45,7 +45,6 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-
 templates = [ os.sep.join([os.getcwd(), template]) if not os.path.isabs(template) else template for template in args.templates]
 replacements = args.replacements or {}
 actions = []
