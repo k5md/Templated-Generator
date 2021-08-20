@@ -24,7 +24,7 @@ See the [virtual environment] documentation for information on how this works.
 2.  Install `virtualenv`
 
     ```sh
-    pip3 install virtualenv
+    pip install virtualenv
     ```
 
 ### Step 2: Create a new project

@@ -1,7 +1,9 @@
 import PyInstaller.__main__
 import os
 import shutil
+import platform
 
+project_name = 'TempGen'
 approot = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.join(approot, 'src')
 build_dir = os.path.join(approot, 'build')
@@ -12,11 +14,10 @@ data = [
 ]
 data_zipped = [ ('--add-data', os.pathsep.join(entry)) for entry in data ] # https://pyinstaller.readthedocs.io/en/stable/spec-files.html#adding-data-files
 data_flat = [item for sublist in data_zipped for item in sublist]
-archive_path = os.path.join(approot, 'TempGen.zip')
 
 PyInstaller.__main__.run([
     entry,
-    '--name', 'TempGen',
+    '--name', project_name,
     '--noconsole',
     '--clean',
     '--distpath', dist_dir,
@@ -25,9 +26,13 @@ PyInstaller.__main__.run([
     '--noconfirm'
 ])
 
+artifact_dir = os.path.join(approot, 'artifacts')
+archive_name = '_'.join([project_name, platform.system()])
+
 try:
-    os.remove(archive_path)
-except:
+    os.mkdir(artifact_dir)
+except FileExistsError:
     pass
 
-shutil.make_archive('TempGen', 'zip', os.path.join(dist_dir, 'TempGen'))
+shutil.make_archive(archive_name, 'zip', os.path.join(dist_dir, project_name))
+shutil.move(os.path.join(approot, archive_name + '.zip'), artifact_dir)

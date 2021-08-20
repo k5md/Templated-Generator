@@ -16,7 +16,7 @@ before_deploy:
 deploy:
   provider: releases
   token: $GITHUB_API_KEY
-  file: 'TempGen.zip'
+  file: 'artifacts/*'
   skip_cleanup: true
   on:
     tags: true

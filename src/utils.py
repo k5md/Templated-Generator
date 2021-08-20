@@ -36,7 +36,7 @@ def extract_zip(source_path, target_path):
             zip_object.extract(file_name, target_path)
 
 def make_zip(source_path, target_path):
-    source_path_last = source_path.split('\\')[-1] # relative path for zipf arcname construction
+    source_path_last = source_path.split(os.sep)[-1] # relative path for zipf arcname construction
     zipf = ZipFile(target_path, 'w', ZIP_DEFLATED)
     for folder_name, subfolders, file_names in os.walk(source_path):
         for file_name in file_names:

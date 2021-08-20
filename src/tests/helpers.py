@@ -1,3 +1,4 @@
+import os
 from zipfile import ZipFile, ZIP_DEFLATED
 import xml.etree.ElementTree as ET
 import shutil
@@ -21,7 +22,7 @@ class DocxExtension(BaseTextExtension):
         super().__init__()
         temp_path = file_path + '_temp'
         extract_zip(file_path, temp_path)
-        tree = ET.parse('\\'.join([temp_path, 'word', 'document.xml']))
+        tree = ET.parse(os.sep.join([temp_path, 'word', 'document.xml']))
         xmlstr = ET.tostring(tree.getroot(), encoding='utf-8', method='xml')
         self.text = xmlstr
         shutil.rmtree(temp_path)
@@ -31,7 +32,7 @@ class XlsxExtension(BaseTextExtension):
         super().__init__()
         temp_path = file_path + '_temp'
         extract_zip(file_path, temp_path)
-        tree = ET.parse('\\'.join([temp_path, 'xl', 'sharedStrings.xml']))
+        tree = ET.parse(os.sep.join([temp_path, 'xl', 'sharedStrings.xml']))
         xmlstr = ET.tostring(tree.getroot(), encoding='utf-8', method='xml')
         self.text = xmlstr
         shutil.rmtree(temp_path)
@@ -41,7 +42,7 @@ class OdfExtension(BaseTextExtension):
         super().__init__()
         temp_path = file_path + '_temp'
         extract_zip(file_path, temp_path)
-        tree = ET.parse('\\'.join([temp_path, 'content.xml']))
+        tree = ET.parse(os.sep.join([temp_path, 'content.xml']))
         xmlstr = ET.tostring(tree.getroot(), encoding='utf-8', method='xml')
         self.text = xmlstr
         shutil.rmtree(temp_path)

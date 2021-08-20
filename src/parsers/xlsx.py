@@ -7,7 +7,7 @@ def parse(path, container, parse_entry, find_matches):
     temp_path = path + '_temp'
     extract_zip(path, temp_path)
     ET.register_namespace('','http://schemas.openxmlformats.org/spreadsheetml/2006/main')
-    tree = ET.parse('\\'.join([temp_path, 'xl', 'sharedStrings.xml']))
+    tree = ET.parse(os.sep.join([temp_path, 'xl', 'sharedStrings.xml']))
     root = tree.getroot()
     for si in root:
         for t in si:
@@ -27,7 +27,7 @@ def replace(source_path, target_path, compute_match, replacements, update_extern
     extract_zip(source_path, temp_path)
         
     ET.register_namespace('','http://schemas.openxmlformats.org/spreadsheetml/2006/main')
-    tree = ET.parse('\\'.join([temp_path, 'xl', 'sharedStrings.xml']))
+    tree = ET.parse(os.sep.join([temp_path, 'xl', 'sharedStrings.xml']))
     root = tree.getroot()
     for si in root:
         for t in si:
