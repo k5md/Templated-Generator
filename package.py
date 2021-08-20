@@ -2,8 +2,12 @@ import PyInstaller.__main__
 import os
 import shutil
 import platform
+from src.__about__ import (
+    __version__,
+    __title__,
+)
 
-project_name = 'TempGen'
+project_name = __title__
 approot = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.join(approot, 'src')
 build_dir = os.path.join(approot, 'build')
@@ -27,7 +31,7 @@ PyInstaller.__main__.run([
 ])
 
 artifact_dir = os.path.join(approot, 'artifacts')
-archive_name = '_'.join([project_name, platform.system()])
+archive_name = '_'.join([project_name, platform.system(), __version__])
 
 try:
     os.mkdir(artifact_dir)

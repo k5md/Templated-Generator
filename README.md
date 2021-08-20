@@ -129,7 +129,7 @@ is to use [pyinstaller].
 4.  Run the following command to create a binary file in src/tempgen/dist
 
     ```sh
-    python setup.py
+    python package.py
     ```
 
 
