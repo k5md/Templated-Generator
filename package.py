@@ -23,8 +23,6 @@ data_flat = [item for sublist in data_zipped for item in sublist]
 PyInstaller.__main__.run([
     entry,
     '--name', project_name,
-    #'--noconsole',
-    '-w',
     '--clean',
     '--distpath', dist_dir,
     '--onedir',
