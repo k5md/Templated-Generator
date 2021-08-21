@@ -4,11 +4,13 @@ from . import plaintext
 from . import ods
 from . import odt
 
-ext_parser_map = {
-    '.docx': docx,
-    '.xlsx': xlsx,
-    '.md': plaintext,
-    '.txt': plaintext,
-    '.odt': odt,
-    '.ods': ods,
-}
+class Parsers():
+    def __init__(self):
+        self.ext_parser_map = {
+            '.docx': docx.Parser(),
+            '.xlsx': xlsx.Parser(),
+            '.md': plaintext.Parser(),
+            '.txt': plaintext.Parser(),
+            '.odt': odt.Parser(),
+            '.ods': ods.Parser(),
+        }

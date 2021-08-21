@@ -4,8 +4,8 @@ import sys
 import re
 import json
 
-from tempgen.parsers import ext_parser_map
-from tempgen.transforms import name_transform_map
+from tempgen.parsers import Parsers
+from tempgen.transforms import Transforms
 
 try:
     approot = os.path.dirname(os.path.abspath(__file__))
@@ -17,6 +17,8 @@ class Tempgen():
         # INIT VALUES
         self.fields = {} # key - id, value - { id, title, __stringVar, __entry }
         self.templates = [] # value - { path }
+        self.parsers = Parsers().ext_parser_map
+        self.transforms = Transforms().name_transform_map
 
     def find_matches(self, text):
         return re.findall(r'{{{.+?}}}+', text)
@@ -25,9 +27,9 @@ class Tempgen():
         if template in self.templates:
             return
         name, ext = os.path.splitext(template)
-        if not (ext in ext_parser_map.keys()):
+        if not (ext in self.parsers.keys()):
             return
-        ext_parser_map[ext].parse(template, self.fields, self.parse_entry, self.find_matches)
+        self.parsers[ext].parse(template, self.fields, self.parse_entry, self.find_matches)
         self.templates.append(template)
         
     def clear_templates(self):
@@ -51,9 +53,9 @@ class Tempgen():
 
     def save_result(self, template_path, target_name, replacements):
         name, ext = os.path.splitext(template_path)
-        if not (ext in ext_parser_map.keys()):
+        if not (ext in self.parsers.keys()):
             return
-        ext_parser_map[ext].replace(
+        self.parsers[ext].replace(
             template_path,
             target_name + ext,
             self.compute_match,
@@ -62,9 +64,9 @@ class Tempgen():
 
     def save_template(self, template, replacements, update_externals):
         name, ext = os.path.splitext(template)
-        if not (ext in ext_parser_map.keys()):
+        if not (ext in self.parsers.keys()):
             return
-        ext_parser_map[ext].replace(
+        self.parsers[ext].replace(
             template,
             name + ext,
             self.compute_updated_template,
@@ -77,8 +79,8 @@ class Tempgen():
         payload = {}
         payload = json.loads(content)
         if 'getter' in payload:
-            if payload['getter'] in name_transform_map:
-                value = name_transform_map[payload['getter']](payload['value'])
+            if payload['getter'] in self.transforms:
+                value = self.transforms[payload['getter']](payload['value'])
                 payload['value'] = str(value)
         autocomplete = payload.get('autocomplete')
         if autocomplete:
@@ -93,8 +95,8 @@ class Tempgen():
             payload = self.parse_entry(match, template_path)
             value = replacements.get(payload['id'], payload['value'])
             if 'fn' in payload:
-                if payload['fn'] in name_transform_map:
-                    value = name_transform_map[payload['fn']](value)
+                if payload['fn'] in self.transforms:
+                    value = self.transforms[payload['fn']](value)
             if 'monetary' in payload and payload['monetary']:
                 value = "{:,.2f}".format(float(value)).replace(",", " ").replace('.', ',')
             if 'append' in payload:
@@ -130,3 +132,6 @@ class Tempgen():
     
     def get_fields(self):
         return self.fields
+
+    def set_fields(self, fields):
+        self.fields = fields
