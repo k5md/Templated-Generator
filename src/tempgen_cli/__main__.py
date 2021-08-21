@@ -3,13 +3,7 @@ import sys
 import argparse
 import json
 
-from tempgen.tempgen_gui import App
-from tempgen.tempgen_mod import Tempgen
-
-if len(sys.argv) == 1:
-    app = App()
-    app.mainloop()
-    sys.exit(0)
+from tempgen.module import Tempgen
 
 parser = argparse.ArgumentParser(description = 'Generate files from templates with template entries replaced')
 parser.add_argument(

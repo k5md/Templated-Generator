@@ -13,10 +13,10 @@ import tkinter.ttk
 import tkinter.messagebox
 import tkinter as tk
 
-from tempgen.libs.scrollableFrame import ScrollableFrame
-from tempgen.libs.autocompleteEntry import AutocompleteEntry
+from tempgen_gui.libs.scrollableFrame import ScrollableFrame
+from tempgen_gui.libs.autocompleteEntry import AutocompleteEntry
 from tempgen.utils import split_by_property_presense, copy_func, make_path
-from tempgen.tempgen_mod import Tempgen
+from tempgen.module import Tempgen
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -260,3 +260,6 @@ class App(tk.Tk):
             separator.pack(fill='x', pady=10)
         for value in group_not_specified_sorted:
             self.render_entry(value, rendered)
+
+app = App()
+app.mainloop()

@@ -3,7 +3,7 @@ import os
 import os
 from collections import defaultdict
 from syrupy.extensions.single_file import SingleFileSnapshotExtension
-from tempgen.tempgen_mod import Tempgen
+from tempgen.module import Tempgen
 from tempgen.parsers import Parsers
 from tempgen.transforms import Transforms
 from tempgen.tests.helpers import ext_serializer_map

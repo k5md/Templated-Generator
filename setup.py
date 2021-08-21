@@ -1,10 +1,11 @@
 import os
 import setuptools
 
+approot = os.getcwd()
+
 with open("README.md", "r", encoding="utf-8") as file:
     long_description = file.read()
 
-approot = os.getcwd()
 with open(os.path.join(approot, 'src', 'tempgen', '__about__.py'), "r", encoding="utf-8") as file:
     about = file.read()
     exec(about)
@@ -33,7 +34,10 @@ setuptools.setup(
         "Topic :: Text Processing",
     ],
     package_dir = { '': 'src' },
-    packages = setuptools.find_packages(where='src'),
+    packages = setuptools.find_packages(
+        where='src',
+        include=['tempgen*'],
+        exclude=['tempgen_*']),
     python_requires = ">=3.6",
     include_package_data = True,
 )
