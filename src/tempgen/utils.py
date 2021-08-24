@@ -2,6 +2,7 @@ import os
 import types
 import functools
 from zipfile import ZipFile, ZIP_DEFLATED
+from pathlib import Path
 
 def has(l , key, value):
     """Check if list has dict with matching key-value pair
@@ -135,3 +136,17 @@ def make_zip(source_path, target_path):
             archive_path = segments[segments.index(source_path_last):]
             zipf.write(file_path, arcname=os.sep.join(archive_path[1:]))
     zipf.close()
+
+def fix_tk_file_path(incorrect_path):
+    """Fix issue when tk.filedialog methods (like askdirectory) yield file paths with incorrect separators using slash instead of double backslash on Windows
+    Parameters
+    ----------
+    incorrect_path : str
+        String using forward slashes like 'C:/Users/Foo/bar/baz'
+    
+    Returns
+    -------
+    str
+        Correct platform-dependent path with os.sep as separator
+    """
+    return str(Path(incorrect_path).resolve())

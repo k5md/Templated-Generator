@@ -16,7 +16,7 @@ import tkinter as tk
 from tempgen_gui.libs.scrollableFrame import ScrollableFrame
 from tempgen_gui.libs.autocompleteEntry import AutocompleteEntry
 from tempgen_gui.libs.controlSequences import wrap_widget
-from tempgen.utils import split_by_key_presense, copy_func, make_path
+from tempgen.utils import split_by_key_presense, copy_func, make_path, fix_tk_file_path
 from tempgen.module import Tempgen
 
 locale.setlocale(locale.LC_ALL, '')
@@ -121,7 +121,7 @@ class App(tk.Tk):
         if template_paths == '' or not len(template_paths):
             return
         for template_path in template_paths:
-            self.add_template(template_path)
+            self.add_template(fix_tk_file_path(template_path))
 
     def add_template(self, template_path = ''):
         self.tempgen.load_template(template_path)
@@ -140,8 +140,8 @@ class App(tk.Tk):
         self.render_entries(self.tempgen.get_fields().values(), self.rendered)
 
     def save_generated(self):
-        generated_files = [os.path.join(self.settings['save_folder'].get(), self.save_file_var.get() + os.path.splitext(template)[1]) for template in self.tempgen.get_templates()]
-        directory_files = [path for path in os.listdir(self.settings['save_folder'].get()) if os.path.isfile(path)]
+        generated_files = [self.save_file_var.get() + os.path.splitext(template)[1] for template in self.tempgen.get_templates()]
+        directory_files = [path for path in os.listdir(self.settings['save_folder'].get()) if os.path.isfile(os.path.join(self.settings['save_folder'].get(), path))]
         for generated_file in generated_files:
             if generated_file in directory_files:
                 proceed = tk.messagebox.askyesno(title=i18n.t('translate.replaceTitle'), message=i18n.t('translate.replaceMessage'))
@@ -181,7 +181,7 @@ class App(tk.Tk):
         save_folder = tk.filedialog.askdirectory()
         if save_folder == '':
             return
-        self.settings['save_folder'].set(save_folder)
+        self.settings['save_folder'].set(fix_tk_file_path(save_folder))
         self.save_settings()
 
     def render_entry(self, value, rendered):
