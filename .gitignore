@@ -127,3 +127,6 @@ dmypy.json
 
 # Visual Studio Code files
 .vscode
+
+# Tempgen GUI config
+src/tempgen_gui/config.json
