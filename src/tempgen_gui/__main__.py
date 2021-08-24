@@ -15,7 +15,7 @@ import tkinter as tk
 
 from tempgen_gui.libs.scrollableFrame import ScrollableFrame
 from tempgen_gui.libs.autocompleteEntry import AutocompleteEntry
-from tempgen.utils import split_by_property_presense, copy_func, make_path
+from tempgen.utils import split_by_key_presense, copy_func, make_path
 from tempgen.module import Tempgen
 
 locale.setlocale(locale.LC_ALL, '')
@@ -234,7 +234,7 @@ class App(tk.Tk):
         self.scrollable_frame.on_scroll = lambda: None
 
         # split fields by presense 'group' property into group_specified and group_not_specified
-        group_specified, group_not_specified = split_by_property_presense(fields, 'group')
+        group_specified, group_not_specified = split_by_key_presense(fields, 'group')
         # sort fields with no 'group' specified by 'title' property
         group_not_specified_sorted = sorted(group_not_specified, key=lambda i: i['title'])
         # group fields with 'group' specified by 'group' property value
@@ -244,7 +244,7 @@ class App(tk.Tk):
         # and place in the end
         group_specified_dict_items_sorted = {}
         for group, entries in group_specified_dict.items():
-            order_specified, order_not_specified = split_by_property_presense(entries, 'order')
+            order_specified, order_not_specified = split_by_key_presense(entries, 'order')
             order_not_specified = sorted(order_not_specified, key=lambda i: i['title'])
             order_specified = sorted(order_specified, key=lambda i: int(i['order']))
             group_specified_dict_items_sorted[group] = order_specified + order_not_specified
