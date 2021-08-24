@@ -1,4 +1,6 @@
-class Parser():
+from tempgen.parsers.parser import AbstractParser
+
+class Parser(AbstractParser):
     def parse(self, path, container, parse_entry, find_matches):
         with open(path, 'r', encoding='utf-8') as file:
             text = file.read()

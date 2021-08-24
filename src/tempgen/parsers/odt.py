@@ -1,8 +1,9 @@
 from odf import opendocument, text, teletype, element, table
 import shutil
 from functools import partial
+from tempgen.parsers.parser import AbstractParser
 
-class Parser():
+class Parser(AbstractParser):
     def parse(self, path, container, parse_entry, find_matches):
         doc = opendocument.load(path)
         paragraphs = doc.getElementsByType(text.P)

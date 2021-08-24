@@ -1,6 +1,7 @@
 import docx
+from tempgen.parsers.parser import AbstractParser
 
-class Parser():
+class Parser(AbstractParser):
     def paragraph_replace_text(self, paragraph, str, replace_str):
         '''
         https://github.com/python-openxml/python-docx/issues/30#issuecomment-881106471

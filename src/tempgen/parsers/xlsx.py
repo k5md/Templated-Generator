@@ -2,8 +2,9 @@ import os
 import xml.etree.ElementTree as ET
 import shutil
 from tempgen.utils import extract_zip, make_zip
+from tempgen.parsers.parser import AbstractParser
 
-class Parser():
+class Parser(AbstractParser):
     def parse(self, path, container, parse_entry, find_matches):
         temp_path = path + '_temp'
         extract_zip(path, temp_path)

@@ -50,12 +50,12 @@ def copy_func(f):
 
     Parameters
     ----------
-    f : Callable
+    f : callable
         Function to copy
 
     Returns
     -------
-    Callable
+    callable
         The exact independent copy of provided function
     """
     g = types.FunctionType(f.__code__, f.__globals__, name=f.__name__,
