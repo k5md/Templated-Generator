@@ -15,6 +15,7 @@ import tkinter as tk
 
 from tempgen_gui.libs.scrollableFrame import ScrollableFrame
 from tempgen_gui.libs.autocompleteEntry import AutocompleteEntry
+from tempgen_gui.libs.controlSequences import wrap_widget
 from tempgen.utils import split_by_key_presense, copy_func, make_path
 from tempgen.module import Tempgen
 
@@ -107,26 +108,13 @@ class App(tk.Tk):
         self.update_idletasks()
         self.minsize(self.winfo_width(), self.winfo_height())
         self.winfo_toplevel().title('Templated generator')
+        wrap_widget(self) # NOTE: quick workaround for issue with cyrillic layouts control sequences
 
         # INIT VALUES
         self.tempgen = Tempgen()
         self.rendered = {}
         for template in [os.path.abspath(path) for path in os.listdir(approot) if os.path.isfile(path) and DEFAULT_TEMPLATE_FILENAME in path]:
             self.add_template(template)
-
-        # NOTE: quick workaround for issue with cyrillic layouts control sequences
-        self.bind_all("<Key>", self._onKeyRelease, "+")
-
-    def _onKeyRelease(self, event):
-        ctrl = (event.state & 0x4) != 0
-        if event.keycode==88 and ctrl and event.keysym.lower() != "x": 
-            event.widget.event_generate("<<Cut>>")
-
-        if event.keycode==86 and ctrl and event.keysym.lower() != "v": 
-            event.widget.event_generate("<<Paste>>")
-
-        if event.keycode==67 and ctrl and event.keysym.lower() != "c":
-            event.widget.event_generate("<<Copy>>")   
 
     def ask_templates(self):
         template_paths = tk.filedialog.Open(self, multiple=True).show()
