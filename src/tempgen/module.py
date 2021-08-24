@@ -75,17 +75,18 @@ class Tempgen():
 
     def parse_entry(self, string, template_path):
         content = string[2:-2]
-        payload = {}
         payload = json.loads(content)
-        if 'getter' in payload:
-            if payload['getter'] in self.transforms:
-                value = self.transforms[payload['getter']](payload['value'])
-                payload['value'] = str(value)
-        autocomplete = payload.get('autocomplete')
-        if autocomplete:
-            if type(autocomplete) is dict and autocomplete.get('external'):
-                external = self.load_external(autocomplete.get('external'), template_path)
-                payload['autocomplete']['data'] = external
+        pre = payload.get('pre', [])
+        for entry in pre:
+            fn = entry.get('fn')
+            args = entry.get('args', [])
+            if fn in self.transforms:
+                payload['value'] = self.transforms[fn](payload['value'], *args)
+        autocomplete = payload.get('autocomplete', {})
+        autocomplete_external = autocomplete.get('external')
+        if autocomplete_external:
+            external = self.load_external(autocomplete_external, template_path)
+            payload['autocomplete']['data'] = external
         return payload
 
     def compute_match(self, text, to_replace, replacements, template_path, *args, **kwargs): # find matches, populate to_replace, return to_replace
@@ -93,13 +94,12 @@ class Tempgen():
         for match in matches:
             payload = self.parse_entry(match, template_path)
             value = replacements.get(payload['id'], payload['value'])
-            if 'fn' in payload:
-                if payload['fn'] in self.transforms:
-                    value = self.transforms[payload['fn']](value)
-            if 'monetary' in payload and payload['monetary']:
-                value = "{:,.2f}".format(float(value)).replace(",", " ").replace('.', ',')
-            if 'append' in payload:
-                value = str(value) + payload['append']
+            post = payload.get('post', [])
+            for entry in post:
+                fn = entry.get('fn')
+                args = entry.get('args', [])
+                if fn in self.transforms:
+                    value = self.transforms[fn](value, *args)
             to_replace[match] = value
         return to_replace
 

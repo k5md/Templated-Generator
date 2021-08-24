@@ -8,12 +8,12 @@
 
 Заказчик: {{{"id": "client", "title": "Заказчик", "value": "ООО \"Рога и копыта\""}}}
 
-Всего наименований 1, на сумму {{{"id": "total", "title": "Сумма", "value": "2500"}}} рублей. ({{{"id": "total", "title": "Сумма", "value": "2500", "fn": "num2text", "group": "primary", "order": "6"}}}).
+Всего наименований 1, на сумму {{{"id": "total", "title": "Сумма", "value": "2500"}}} рублей. ({{{"id": "total", "title": "Сумма", "value": "2500", "post": [{"fn": "ru_monetary_as_string"}], "group": "primary", "order": "6"}}}).
 Без НДС.
 
  		
 
-Всего оказано услуг на сумму: {{{"id": "total", "title": "Сумма", "value": "2500", "fn": "num2text"}}}.
+Всего оказано услуг на сумму: {{{"id": "total", "title": "Сумма", "value": "2500", "post": [{"fn": "ru_monetary_as_string"}]}}}.
 
 
 
