@@ -6,19 +6,20 @@ from pathlib import Path
 
 def has(l , key, value):
     """Check if list has dict with matching key-value pair
+
     Parameters
     ----------
     l : List[Dict[str, Any]]
         List to check for matches
     key : str
         Key to find in list's dictionaries
-    value: Any
+    value : Any
         Value to be compared with value in suitable key-value pair in each dictionary in list
 
     Returns
     -------
     bool
-        True if list has dictionary key-value pair matching given key and value, False otherwise.
+        True if list has dictionary with key-value pair matching given key and value, False otherwise.
     """
     for item in l:
         if item[key] == value:
@@ -27,6 +28,7 @@ def has(l , key, value):
 
 def split_by_key_presense(l, key):
     """Split list of dictionaries into two lists based on key presense
+
     Parameters
     ----------
     l : List[Dict[str, Any]]
@@ -74,8 +76,9 @@ def make_path(d, *paths):
     d : Dict[str, Any]
         Provided dictionary
     
-    *paths:
+    *args:
         Variable length list of path segments to create if not present
+
     Returns
     -------
     Dict
@@ -108,7 +111,7 @@ def extract_zip(source_path, target_path):
     source_path : str
         Path to archive to be extracted
     
-    target_path: str
+    target_path : str
         Path to directory to extract archive content
     """
     with ZipFile(source_path, 'r') as zip_object:
@@ -124,7 +127,7 @@ def make_zip(source_path, target_path):
     source_path : str
         Path to directory to be archived
     
-    target_path: str
+    target_path : str
         Path (with file name) where to store resulting archive
     """
     source_path_last = source_path.split(os.sep)[-1] # relative path for zipf arcname construction
@@ -138,7 +141,8 @@ def make_zip(source_path, target_path):
     zipf.close()
 
 def fix_tk_file_path(incorrect_path):
-    """Fix issue when tk.filedialog methods (like askdirectory) yield file paths with incorrect separators using slash instead of double backslash on Windows
+    """Fix issue when tk.filedialog methods (like askdirectory) yield file paths with incorrect separators using slashes instead of backslashes on Windows
+
     Parameters
     ----------
     incorrect_path : str
