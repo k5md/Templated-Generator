@@ -7,7 +7,23 @@ Templated generator is a utility, that allows users generate files from template
 The project includes python module, available on pypi, for use inside python scripts, cli and gui applications to edit template entries and quickly generate documents.
 
 ## Template entries
-Generally, template entries are stringified and enclosed in double curly brackets valid JSON objects. Minimal template entry contains id and value properties. Entry ids can be not unique and for each entry, the value specified as replacement will be substituted after transforms.
+Generally, template entries are stringified and enclosed in double curly brackets valid JSON objects. Here is an example:
+```
+{{{"id": "total", "title": "Total cost", "value": "2500", "post": [{"fn": "append", "args": [" U.S. Dollars"]}], "group": "primary", "order": "1"}}}
+```
+Minimal template entry contains id and value properties. Entry ids can be not unique and for each entry, the value specified once as replacement will be substituted and transforms (for respective entry) will be applied. This allows to edit value associated with id encountered multiple times over multiple templates only once.
+For instance loaded templates can contain:
+```
+{{{"id": "total", "value": "2500", "post": [{"fn": "append", "args": [" U.S. Dollars"]}]}}}
+{{{"id": "total", "value": "2500", "post": [{"fn": "append", "args": ["$"]}]}}}
+{{{"id": "total", "value": "2500"}}}
+```
+In GUI application all three will be represented by one input with default value of "2500". Given replacements dictionary (for cli and using as module) of { "total": "42" }, or if input in this field equals "42" (for gui application), these will be represented in generated documents as
+```
+42 U.S. Dollars
+42$
+42
+```
 
 ### Entry object properties
 | property name  | type   | required | description |
@@ -22,6 +38,13 @@ Generally, template entries are stringified and enclosed in double curly bracket
 | autocomplete | object | no | specifies which suggestions should be displayed on user input in entry representation in tempgen_gui
 
 ### Transform object properties
+Transforms available by default are listed [here](https://github.com/k5md/Templated-Generator/blob/master/src/tempgen/transforms.py) .
+These are functions, that are applied on "value" property sequentially either
+* when template is loaded, if transform is in "pre" list
+* when generated document is being saved, if transform is in "post" list
+
+Transforms are provided with value (from entry) automatically, additional arguments could be provided via "args" array.
+**Note**: When using as a module, one can easily modify the dictionary by changing tempgen instance 'transforms' attribute
 | property name  | type   | required | description |
 | :--------  | :----  | :------- | :---------- |
 | fn | string | yes | name of transform function|
@@ -118,11 +141,25 @@ pytest --snapshot-update
 ```
 
 ### Creating portable executables
+This project employs pyinstaller to create binaries. To generate executables from sources on your PC:
 1. Enter the virtual environment (run `source .env/bin/activate` or OS/shell equivalent).
 2.  Run the following command to create bundles with binaries for tempgen_cli and tempgen_gui in project's dist directory
     ```sh
     python package.py
     ```
+Generated archives will be placed in **artifacts** directory
+### Packaging module
+Run the following command to package tempgen module:
+```sh
+python3 -m build
+```
+Generated archive and .whl package will be placed in **dist** directory.
+
+### Generating documentation
+Run the following command to generate updated documentation from collected docstrings and place it in **docs** directory:
+```sh
+pdoc3 --html src\tempgen --output-dir docs
+```
 
 ## Contributions
 PR are always welcome!

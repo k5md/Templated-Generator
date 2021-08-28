@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>tempgen.libs.num2t4ru API documentation</title>
+<meta name="description" content="Created on 04.07.2011
+Changed on 13.03.2016 by Artem Tiumentcev
+@author: Sergey Prokhorov &lt;me@seriyps.ru&gt;" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>tempgen.libs.num2t4ru</code></h1>
+</header>
+<section id="section-intro">
+<p>Created on 04.07.2011
+Changed on 13.03.2016 by Artem Tiumentcev
+@author: Sergey Prokhorov <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#101;&#64;&#115;&#101;&#114;&#105;&#121;&#112;&#115;&#46;&#114;&#117;">&#109;&#101;&#64;&#115;&#101;&#114;&#105;&#121;&#112;&#115;&#46;&#114;&#117;</a></p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># -*- coding: utf-8 -*-
+&#39;&#39;&#39;
+Created on 04.07.2011
+Changed on 13.03.2016 by Artem Tiumentcev
+@author: Sergey Prokhorov &lt;me@seriyps.ru&gt;
+&#39;&#39;&#39;
+import decimal
+
+units = (
+    u&#39;ноль&#39;,
+
+    (u&#39;один&#39;, u&#39;одна&#39;),
+    (u&#39;два&#39;, u&#39;две&#39;),
+
+    u&#39;три&#39;, u&#39;четыре&#39;, u&#39;пять&#39;,
+    u&#39;шесть&#39;, u&#39;семь&#39;, u&#39;восемь&#39;, u&#39;девять&#39;
+)
+
+teens = (
+    u&#39;десять&#39;, u&#39;одиннадцать&#39;,
+    u&#39;двенадцать&#39;, u&#39;тринадцать&#39;,
+    u&#39;четырнадцать&#39;, u&#39;пятнадцать&#39;,
+    u&#39;шестнадцать&#39;, u&#39;семнадцать&#39;,
+    u&#39;восемнадцать&#39;, u&#39;девятнадцать&#39;
+)
+
+tens = (
+    teens,
+    u&#39;двадцать&#39;, u&#39;тридцать&#39;,
+    u&#39;сорок&#39;, u&#39;пятьдесят&#39;,
+    u&#39;шестьдесят&#39;, u&#39;семьдесят&#39;,
+    u&#39;восемьдесят&#39;, u&#39;девяносто&#39;
+)
+
+hundreds = (
+    u&#39;сто&#39;, u&#39;двести&#39;,
+    u&#39;триста&#39;, u&#39;четыреста&#39;,
+    u&#39;пятьсот&#39;, u&#39;шестьсот&#39;,
+    u&#39;семьсот&#39;, u&#39;восемьсот&#39;,
+    u&#39;девятьсот&#39;
+)
+
+orders = (# plural forms and gender
+    #((u&#39;&#39;, u&#39;&#39;, u&#39;&#39;), &#39;m&#39;), # ((u&#39;рубль&#39;, u&#39;рубля&#39;, u&#39;рублей&#39;), &#39;m&#39;), # ((u&#39;копейка&#39;, u&#39;копейки&#39;, u&#39;копеек&#39;), &#39;f&#39;)
+    ((u&#39;тысяча&#39;, u&#39;тысячи&#39;, u&#39;тысяч&#39;), &#39;f&#39;),
+    ((u&#39;миллион&#39;, u&#39;миллиона&#39;, u&#39;миллионов&#39;), &#39;m&#39;),
+    ((u&#39;миллиард&#39;, u&#39;миллиарда&#39;, u&#39;миллиардов&#39;), &#39;m&#39;),
+)
+
+minus = u&#39;минус&#39;
+
+
+def thousand(rest, sex):
+    &#34;&#34;&#34;Converts numbers from 19 to 999&#34;&#34;&#34;
+    prev = 0
+    plural = 2
+    name = []
+    use_teens = rest % 100 &gt;= 10 and rest % 100 &lt;= 19
+    if not use_teens:
+        data = ((units, 10), (tens, 100), (hundreds, 1000))
+    else:
+        data = ((teens, 10), (hundreds, 1000))
+    for names, x in data:
+        cur = int(((rest - prev) % x) * 10 / x)
+        prev = rest % x
+        if x == 10 and use_teens:
+            plural = 2
+            name.append(teens[cur])
+        elif cur == 0:
+            continue
+        elif x == 10:
+            name_ = names[cur]
+            if isinstance(name_, tuple):
+                name_ = name_[0 if sex == &#39;m&#39; else 1]
+            name.append(name_)
+            if cur &gt;= 2 and cur &lt;= 4:
+                plural = 1
+            elif cur == 1:
+                plural = 0
+            else:
+                plural = 2
+        else:
+            name.append(names[cur-1])
+    return plural, name
+
+
+def num2text(num, main_units=((u&#39;&#39;, u&#39;&#39;, u&#39;&#39;), &#39;m&#39;)):
+    &#34;&#34;&#34;
+    http://ru.wikipedia.org/wiki/Gettext#.D0.9C.D0.BD.D0.BE.D0.B6.D0.B5.D1.81.\
+    D1.82.D0.B2.D0.B5.D0.BD.D0.BD.D1.8B.D0.B5_.D1.87.D0.B8.D1.81.D0.BB.D0.B0_2
+    &#34;&#34;&#34;
+    _orders = (main_units,) + orders
+    if num == 0:
+        return &#39; &#39;.join((units[0], _orders[0][0][2])).strip() # ноль
+
+    rest = abs(num)
+    ord = 0
+    name = []
+    while rest &gt; 0:
+        plural, nme = thousand(rest % 1000, _orders[ord][1])
+        if nme or ord == 0:
+            name.append(_orders[ord][0][plural])
+        name += nme
+        rest = int(rest / 1000)
+        ord += 1
+    if num &lt; 0:
+        name.append(minus)
+    name.reverse()
+    return &#39; &#39;.join(name).strip()
+
+
+def decimal2text(value, places=2,
+                 int_units=((&#39;&#39;, &#39;&#39;, &#39;&#39;), &#39;m&#39;),
+                 exp_units=((&#39;&#39;, &#39;&#39;, &#39;&#39;), &#39;m&#39;)):
+    value = decimal.Decimal(value)
+    q = decimal.Decimal(10) ** -places
+
+    integral, exp = str(value.quantize(q)).split(&#39;.&#39;)
+    return u&#39;{} {}&#39;.format(
+        num2text(int(integral), int_units),
+        num2text(int(exp), exp_units))
+
+if __name__ == &#39;__main__&#39;:
+    import sys
+    if len(sys.argv) &gt; 1:
+        try:
+            num = sys.argv[1]
+            if &#39;.&#39; in num:
+                print(decimal2text(
+                    decimal.Decimal(num),
+                    int_units=((u&#39;штука&#39;, u&#39;штуки&#39;, u&#39;штук&#39;), &#39;f&#39;),
+                    exp_units=((u&#39;кусок&#39;, u&#39;куска&#39;, u&#39;кусков&#39;), &#39;m&#39;)))
+            else:
+                print(num2text(
+                    int(num),
+                    main_units=((u&#39;штука&#39;, u&#39;штуки&#39;, u&#39;штук&#39;), &#39;f&#39;)))
+        except ValueError:
+            print (sys.stderr, &#34;Invalid argument {}&#34;.format(sys.argv[1]))
+        sys.exit()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="tempgen.libs.num2t4ru.decimal2text"><code class="name flex">
+<span>def <span class="ident">decimal2text</span></span>(<span>value, places=2, int_units=(('', '', ''), 'm'), exp_units=(('', '', ''), 'm'))</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def decimal2text(value, places=2,
+                 int_units=((&#39;&#39;, &#39;&#39;, &#39;&#39;), &#39;m&#39;),
+                 exp_units=((&#39;&#39;, &#39;&#39;, &#39;&#39;), &#39;m&#39;)):
+    value = decimal.Decimal(value)
+    q = decimal.Decimal(10) ** -places
+
+    integral, exp = str(value.quantize(q)).split(&#39;.&#39;)
+    return u&#39;{} {}&#39;.format(
+        num2text(int(integral), int_units),
+        num2text(int(exp), exp_units))</code></pre>
+</details>
+</dd>
+<dt id="tempgen.libs.num2t4ru.num2text"><code class="name flex">
+<span>def <span class="ident">num2text</span></span>(<span>num, main_units=(('', '', ''), 'm'))</span>
+</code></dt>
+<dd>
+<div class="desc"><p><a href="http://ru.wikipedia.org/wiki/Gettext#.D0.9C.D0.BD.D0.BE.D0.B6.D0.B5.D1.81.">http://ru.wikipedia.org/wiki/Gettext#.D0.9C.D0.BD.D0.BE.D0.B6.D0.B5.D1.81.</a>
+D1.82.D0.B2.D0.B5.D0.BD.D0.BD.D1.8B.D0.B5_.D1.87.D0.B8.D1.81.D0.BB.D0.B0_2</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def num2text(num, main_units=((u&#39;&#39;, u&#39;&#39;, u&#39;&#39;), &#39;m&#39;)):
+    &#34;&#34;&#34;
+    http://ru.wikipedia.org/wiki/Gettext#.D0.9C.D0.BD.D0.BE.D0.B6.D0.B5.D1.81.\
+    D1.82.D0.B2.D0.B5.D0.BD.D0.BD.D1.8B.D0.B5_.D1.87.D0.B8.D1.81.D0.BB.D0.B0_2
+    &#34;&#34;&#34;
+    _orders = (main_units,) + orders
+    if num == 0:
+        return &#39; &#39;.join((units[0], _orders[0][0][2])).strip() # ноль
+
+    rest = abs(num)
+    ord = 0
+    name = []
+    while rest &gt; 0:
+        plural, nme = thousand(rest % 1000, _orders[ord][1])
+        if nme or ord == 0:
+            name.append(_orders[ord][0][plural])
+        name += nme
+        rest = int(rest / 1000)
+        ord += 1
+    if num &lt; 0:
+        name.append(minus)
+    name.reverse()
+    return &#39; &#39;.join(name).strip()</code></pre>
+</details>
+</dd>
+<dt id="tempgen.libs.num2t4ru.thousand"><code class="name flex">
+<span>def <span class="ident">thousand</span></span>(<span>rest, sex)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Converts numbers from 19 to 999</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def thousand(rest, sex):
+    &#34;&#34;&#34;Converts numbers from 19 to 999&#34;&#34;&#34;
+    prev = 0
+    plural = 2
+    name = []
+    use_teens = rest % 100 &gt;= 10 and rest % 100 &lt;= 19
+    if not use_teens:
+        data = ((units, 10), (tens, 100), (hundreds, 1000))
+    else:
+        data = ((teens, 10), (hundreds, 1000))
+    for names, x in data:
+        cur = int(((rest - prev) % x) * 10 / x)
+        prev = rest % x
+        if x == 10 and use_teens:
+            plural = 2
+            name.append(teens[cur])
+        elif cur == 0:
+            continue
+        elif x == 10:
+            name_ = names[cur]
+            if isinstance(name_, tuple):
+                name_ = name_[0 if sex == &#39;m&#39; else 1]
+            name.append(name_)
+            if cur &gt;= 2 and cur &lt;= 4:
+                plural = 1
+            elif cur == 1:
+                plural = 0
+            else:
+                plural = 2
+        else:
+            name.append(names[cur-1])
+    return plural, name</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="tempgen.libs" href="index.html">tempgen.libs</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="tempgen.libs.num2t4ru.decimal2text" href="#tempgen.libs.num2t4ru.decimal2text">decimal2text</a></code></li>
+<li><code><a title="tempgen.libs.num2t4ru.num2text" href="#tempgen.libs.num2t4ru.num2text">num2text</a></code></li>
+<li><code><a title="tempgen.libs.num2t4ru.thousand" href="#tempgen.libs.num2t4ru.thousand">thousand</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
