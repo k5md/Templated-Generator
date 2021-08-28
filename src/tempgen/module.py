@@ -125,7 +125,7 @@ class Tempgen():
         target_name : str
             Name (without extension) of file to save results
         replacements : Dict[str, str]
-            Dictionary with raw entries (valid JSON object stringified enclosed in double curly brackets) as keys and their substitutions as values
+            Dictionary with entries ids as keys and their substitutions as values
         """
         name, ext = os.path.splitext(template_path)
         if not (ext in self.parsers.keys()):
@@ -145,7 +145,7 @@ class Tempgen():
         template_path : str
             Absolute path to template file
         replacements : Dict[str, str]
-            Dictionary with raw entries (valid JSON object stringified enclosed in double curly brackets) as keys and their substitutions as values
+            Dictionary with entries ids as keys and their substitutions as values
         update_externals : bool
             Flag specifying whether external resources referenced from template should be updated with new values
         """
