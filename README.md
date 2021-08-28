@@ -1,5 +1,5 @@
 # Templated Generator
-[![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/) [![Build Status](https://app.travis-ci.com/k5md/Templated-Generator.svg?token=ZSWp3q2qzbTb4nzaxqWy&branch=master)](https://app.travis-ci.com/k5md/Templated-Generator) 
+[![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-370/) [![Build Status](https://app.travis-ci.com/k5md/Templated-Generator.svg?token=ZSWp3q2qzbTb4nzaxqWy&branch=master)](https://app.travis-ci.com/k5md/Templated-Generator) 
 [![tempgen.png](https://s9.gifyu.com/images/tempgen.png)](https://gifyu.com/image/GfBa)
 
 Templated generator is a utility, that allows users generate files from templates with embedded template entries that could be edited and automatically transformed, saving time that would be otherwise spend on manually editing generic documents.
@@ -97,7 +97,7 @@ t.save_result(absolute_path_to_template, target_name_without_extension, { "id_fr
 
 ## Development
 ### Environment setup
-1.  Install Python 3.6+
+1.  Install Python 3.7+
 2.  Install `virtualenv`
     ```sh
     pip install virtualenv
@@ -166,7 +166,7 @@ Generated archive and .whl package will be placed in **dist** directory.
 ### Generating documentation
 Run the following command to generate updated documentation from collected docstrings and place it in **docs** directory:
 ```sh
-pdoc3 --html src\tempgen --output-dir docs --force
+pdoc --html src\tempgen --output-dir docs
 ```
 
 ## Contributions

@@ -6,7 +6,7 @@ approot = os.getcwd()
 with open("README.md", "r", encoding="utf-8") as file:
     long_description = file.read()
 
-with open(os.path.join(approot, 'src', 'tempgen', '__about__.py'), "r", encoding="utf-8") as file:
+with open(os.path.join(approot, "src", "tempgen", "__about__.py"), "r", encoding="utf-8") as file:
     about = file.read()
     exec(about)
 
@@ -33,11 +33,17 @@ setuptools.setup(
         "Topic :: Office/Business",
         "Topic :: Text Processing",
     ],
-    package_dir = { '': 'src' },
+    package_dir = { "": "src" },
     packages = setuptools.find_packages(
-        where='src',
-        include=['tempgen*'],
-        exclude=['tempgen_*']),
-    python_requires = ">=3.6",
+        where="src",
+        include=["tempgen*"],
+        exclude=["tempgen_*"]),
+    python_requires = ">=3.7",
+    install_requires=[
+        "odfpy>=1.4.1",
+        "python-docx>=0.8.11",
+        "python-i18n>=0.3.9",
+        "python-i18n[YAML]",
+    ],
     include_package_data = True,
 )
