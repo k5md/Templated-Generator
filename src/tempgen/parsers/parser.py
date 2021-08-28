@@ -56,7 +56,7 @@ class AbstractParser(ABC):
         
         Notes
         -----
-            For compute_match signature check documentation in tempgen\\module.py
+            For compute_match signature check documentation in tempgen.module
 
         """
         pass
