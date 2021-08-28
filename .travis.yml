@@ -19,8 +19,6 @@ jobs:
 script:
   - pip install -r requirements.txt
   - pytest
-
-before_deploy:
   - python package.py
 
 deploy:

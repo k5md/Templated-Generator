@@ -66,7 +66,7 @@ Transforms are provided with value (from entry) automatically, additional argume
 pip install tempgen
 ```
 
-#### Usage
+#### Usage as module
 ```python
 from tempgen.module import Tempgen
 
@@ -86,6 +86,14 @@ t.get_fields() # get reference to parsed entries
 
 t.save_result(absolute_path_to_template, target_name_without_extension, { "id_from_template_text": "desired value" })
 ```
+
+### Supported extensions
+- docx
+- xlsx
+- md
+- txt
+- odt
+- ods
 
 ## Development
 ### Environment setup
@@ -151,14 +159,14 @@ Generated archives will be placed in **artifacts** directory
 ### Packaging module
 Run the following command to package tempgen module:
 ```sh
-python3 -m build
+python -m build
 ```
 Generated archive and .whl package will be placed in **dist** directory.
 
 ### Generating documentation
 Run the following command to generate updated documentation from collected docstrings and place it in **docs** directory:
 ```sh
-pdoc3 --html src\tempgen --output-dir docs
+pdoc3 --html src\tempgen --output-dir docs --force
 ```
 
 ## Contributions
