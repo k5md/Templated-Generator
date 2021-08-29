@@ -62,6 +62,7 @@ Transforms are provided with value (from entry) automatically, additional argume
 * Unpack archive to any directory
 * Run tempgen_gui/tempgen_cli binary
 ### Installation as module
+To install from [pypi](https://pypi.org/project/tempgen/):
 ```
 pip install tempgen
 ```
@@ -166,7 +167,7 @@ Generated archive and .whl package will be placed in **dist** directory.
 ### Generating documentation
 Run the following command to generate updated documentation from collected docstrings and place it in **docs** directory:
 ```sh
-pdoc --html src\tempgen --output-dir docs
+pdoc src\tempgen --output-dir docs -d numpy
 ```
 
 ## Contributions

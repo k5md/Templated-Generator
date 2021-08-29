@@ -268,19 +268,22 @@
 
             <div class="docstring"><p>Check if list has dict with matching key-value pair</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>l : List[Dict[str, Any]]
-    List to check for matches
-key : str
-    Key to find in list's dictionaries
-value : Any
-    Value to be compared with value in suitable key-value pair in each dictionary in list</p>
+<ul>
+<li><strong>l</strong> (List[Dict[str, Any]]):
+List to check for matches</li>
+<li><strong>key</strong> (str):
+Key to find in list's dictionaries</li>
+<li><strong>value</strong> (Any):
+Value to be compared with value in suitable key-value pair in each dictionary in list</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>bool
-    True if list has dictionary with key-value pair matching given key and value, False otherwise.</p>
+<ul>
+<li><strong>bool</strong>: True if list has dictionary with key-value pair matching given key and value, False otherwise.</li>
+</ul>
 </div>
 
 
@@ -320,17 +323,20 @@ value : Any
 
             <div class="docstring"><p>Split list of dictionaries into two lists based on key presense</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>l : List[Dict[str, Any]]
-    List to split
-key : str
-    Key to find in list's dictionaries</p>
+<ul>
+<li><strong>l</strong> (List[Dict[str, Any]]):
+List to split</li>
+<li><strong>key</strong> (str):
+Key to find in list's dictionaries</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>Tuple[List[Any], List[Any]]
-    First list in tuple containing l's dictionaries that have given key, second list contain l's dictionaries that don't</p>
+<ul>
+<li><strong>Tuple[List[Any], List[Any]]</strong>: First list in tuple containing l's dictionaries that have given key, second list contain l's dictionaries that don't</li>
+</ul>
 </div>
 
 
@@ -374,15 +380,18 @@ key : str
 
 <p>Based on http://stackoverflow.com/a/6528148/190597 (Glenn Maynard)</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>f : callable
-    Function to copy</p>
+<ul>
+<li><strong>f</strong> (callable):
+Function to copy</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>callable
-    The exact independent copy of provided function</p>
+<ul>
+<li><strong>callable</strong>: The exact independent copy of provided function</li>
+</ul>
 </div>
 
 
@@ -436,25 +445,27 @@ key : str
 
             <div class="docstring"><p>Create nested dictionaries in path in dictionary</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>d : Dict[str, Any]
-    Provided dictionary</p>
+<ul>
+<li><strong>d</strong> (Dict[str, Any]):
+Provided dictionary</li>
+<li><strong>*args:</strong>: Variable length list of path segments to create if not present</li>
+</ul>
 
-<p>*args:
-    Variable length list of path segments to create if not present</p>
+<h6 id="returns">Returns</h6>
 
-<h2 id="returns">Returns</h2>
+<ul>
+<li><strong>Dict</strong>: Dict with nested dicts with paths items as keys</li>
+</ul>
 
-<p>Dict
-    Dict with nested dicts with paths items as keys</p>
+<h6 id="raises">Raises</h6>
 
-<h2 id="raises">Raises</h2>
+<ul>
+<li><strong>AttributeError</strong>: If path segment already exists on the same level of provided dictionary AND is not a dictionary</li>
+</ul>
 
-<p>AttributeError
-    If path segment already exists on the same level of provided dictionary AND is not a dictionary</p>
-
-<h2 id="examples">Examples</h2>
+<h6 id="examples">Examples</h6>
 
 <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">test</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;foo&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s2">&quot;baz&quot;</span><span class="p">:</span> <span class="mi">42</span> <span class="p">}</span> <span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">make_path</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="s2">&quot;bar&quot;</span><span class="p">,</span> <span class="s2">&quot;baz&quot;</span><span class="p">)</span>
@@ -497,13 +508,14 @@ key : str
 
             <div class="docstring"><p>Extract zip archive</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>source_path : str
-    Path to archive to be extracted</p>
-
-<p>target_path : str
-    Path to directory to extract archive content</p>
+<ul>
+<li><strong>source_path</strong> (str):
+Path to archive to be extracted</li>
+<li><strong>target_path</strong> (str):
+Path to directory to extract archive content</li>
+</ul>
 </div>
 
 
@@ -544,13 +556,14 @@ key : str
 
             <div class="docstring"><p>Create zip archive with only related paths (source_path &gt; files or directories)</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>source_path : str
-    Path to directory to be archived</p>
-
-<p>target_path : str
-    Path (with file name) where to store resulting archive</p>
+<ul>
+<li><strong>source_path</strong> (str):
+Path to directory to be archived</li>
+<li><strong>target_path</strong> (str):
+Path (with file name) where to store resulting archive</li>
+</ul>
 </div>
 
 
@@ -585,15 +598,18 @@ key : str
 
             <div class="docstring"><p>Fix issue when tk.filedialog methods (like askdirectory) yield file paths with incorrect separators using slashes instead of backslashes on Windows</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>incorrect_path : str
-    String using forward slashes like 'C:/Users/Foo/bar/baz'</p>
+<ul>
+<li><strong>incorrect_path</strong> (str):
+String using forward slashes like 'C:/Users/Foo/bar/baz'</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>str
-    Correct platform-dependent path with os.sep as separator</p>
+<ul>
+<li><strong>str</strong>: Correct platform-dependent path with os.sep as separator</li>
+</ul>
 </div>
 
 

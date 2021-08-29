@@ -195,15 +195,17 @@
 
             <div class="docstring"><p>Class contains dictionary of function names and functions to be used in "pre" and "post" objects as "fn" property value in templates</p>
 
-<h2 id="attributes">Attributes</h2>
+<h6 id="attributes">Attributes</h6>
 
-<p>name_transform_map : Dict[str, callable]
-    Dictionary containing supported "functions" allowed in "pre" and "post" objects as "fn" property value in templates, uses function name as key and
-    function itself as value, these functions are applied on entry value.
-    Value argument is passed automatically, additional arguments to these functions are passed as "args" array.
-    Transform functions are executed sequentially, with value from prefious transform being passed to the next one.
-    Transforms used in "pre" object are applied to value from template entry when template is loaded, tempgen fields will contain already transformed value
-    Transforms used in "post" object are applied to value taken from tempgen fields only when generated document is being saved, tempgen fields will not be affected</p>
+<ul>
+<li><strong>name_transform_map</strong> (Dict[str, callable]):
+Dictionary containing supported "functions" allowed in "pre" and "post" objects as "fn" property value in templates, uses function name as key and
+function itself as value, these functions are applied on entry value.
+Value argument is passed automatically, additional arguments to these functions are passed as "args" array.
+Transform functions are executed sequentially, with value from prefious transform being passed to the next one.
+Transforms used in "pre" object are applied to value from template entry when template is loaded, tempgen fields will contain already transformed value
+Transforms used in "post" object are applied to value taken from tempgen fields only when generated document is being saved, tempgen fields will not be affected</li>
+</ul>
 </div>
 
 

@@ -53,10 +53,5 @@ class AbstractParser(ABC):
             Dictionary containing pairs of "{{VALID_JSON_OBJECT}}" keys and their replacements as values
         update_external : bool, optional
             Boolean, indicating whether external resources should be updated
-        
-        Notes
-        -----
-            For compute_match signature check documentation in tempgen.module
-
         """
         pass

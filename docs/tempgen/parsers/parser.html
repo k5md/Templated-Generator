@@ -116,11 +116,6 @@
 <span class="sd">            Dictionary containing pairs of &quot;{{VALID_JSON_OBJECT}}&quot; keys and their replacements as values</span>
 <span class="sd">        update_external : bool, optional</span>
 <span class="sd">            Boolean, indicating whether external resources should be updated</span>
-<span class="sd">        </span>
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">            For compute_match signature check documentation in tempgen.module</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 </pre></div>
@@ -192,11 +187,6 @@
 <span class="sd">            Dictionary containing pairs of &quot;{{VALID_JSON_OBJECT}}&quot; keys and their replacements as values</span>
 <span class="sd">        update_external : bool, optional</span>
 <span class="sd">            Boolean, indicating whether external resources should be updated</span>
-<span class="sd">        </span>
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">            For compute_match signature check documentation in tempgen.module</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 </pre></div>
@@ -258,16 +248,18 @@ inheritance.</p>
 <li>For each entry use entry "id" property as key and payload as value to populate the container provided</li>
 </ol>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>path : str
-    Absolute path to file to be parsed
-container : Dict[str, [Dict[str, Any]]]
-    Dictionary to be populated with parsed entries, contains key-value pairs with entry id property as key and entry payload dictionary as value
-parse_entry : callable
-    Function that extracts entry (current implementation uses json parse) from matching string, returns entry payload dictionary
-find_matches : callable
-    Function that searches the entry string for matches (that is, {{VALID_JSON_OBJECT}} patterns), returns array of matching substrings</p>
+<ul>
+<li><strong>path</strong> (str):
+Absolute path to file to be parsed</li>
+<li><strong>container</strong> (Dict[str, [Dict[str, Any]]]):
+Dictionary to be populated with parsed entries, contains key-value pairs with entry id property as key and entry payload dictionary as value</li>
+<li><strong>parse_entry</strong> (callable):
+Function that extracts entry (current implementation uses json parse) from matching string, returns entry payload dictionary</li>
+<li><strong>find_matches</strong> (callable):
+Function that searches the entry string for matches (that is, {{VALID_JSON_OBJECT}} patterns), returns array of matching substrings</li>
+</ul>
 </div>
 
 
@@ -318,11 +310,6 @@ find_matches : callable
 <span class="sd">            Dictionary containing pairs of &quot;{{VALID_JSON_OBJECT}}&quot; keys and their replacements as values</span>
 <span class="sd">        update_external : bool, optional</span>
 <span class="sd">            Boolean, indicating whether external resources should be updated</span>
-<span class="sd">        </span>
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">            For compute_match signature check documentation in tempgen.module</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 </pre></div>
@@ -341,28 +328,27 @@ find_matches : callable
 <li>Create file at target_path and write modified text</li>
 </ol>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>source_path : str
-    Absolute path to file to be parsed
-target_path : str
-    Absolute path to file to be generated
-compute_match : callable
-    Function that
-        1. searches the entry string for matches (that is, {{VALID_JSON_OBJECT}} patterns)
-        2. finds entry id in replacements dictionary
-        3. populates to_replace dictionary parameter with "{{VALID_JSON_OBJECT}}" as key and replacement string as value
-        4. if update_external is True, it updates external resources with replacement string
-        5. returns to_replace dictionary
-replacements : Dict[str, str]
-    Dictionary containing pairs of "{{VALID_JSON_OBJECT}}" keys and their replacements as values
-update_external : bool, optional
-    Boolean, indicating whether external resources should be updated</p>
-
-<h2 id="notes">Notes</h2>
-
-<pre><code>For compute_match signature check documentation in <a href="../module.html">tempgen.module</a>
-</code></pre>
+<ul>
+<li><strong>source_path</strong> (str):
+Absolute path to file to be parsed</li>
+<li><strong>target_path</strong> (str):
+Absolute path to file to be generated</li>
+<li><strong>compute_match</strong> (callable):
+Function that
+<ol>
+<li>searches the entry string for matches (that is, {{VALID_JSON_OBJECT}} patterns)</li>
+<li>finds entry id in replacements dictionary</li>
+<li>populates to_replace dictionary parameter with "{{VALID_JSON_OBJECT}}" as key and replacement string as value</li>
+<li>if update_external is True, it updates external resources with replacement string</li>
+<li>returns to_replace dictionary</li>
+</ol></li>
+<li><strong>replacements</strong> (Dict[str, str]):
+Dictionary containing pairs of "{{VALID_JSON_OBJECT}}" keys and their replacements as values</li>
+<li><strong>update_external</strong> (bool, optional):
+Boolean, indicating whether external resources should be updated</li>
+</ul>
 </div>
 
 
