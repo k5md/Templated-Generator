@@ -25,7 +25,7 @@ gui_name = '%s_gui' % project_name
 cli_name = '%s_cli' % project_name
 
 gui_data = [
-    (os.path.join(src_dir, gui_name,'locales'), os.sep.join(['locales']))
+    (os.path.join(src_dir, gui_name,'locales'), os.sep.join(['locales'])),
 ]
 gui_data_zipped = [ ('--add-data', os.pathsep.join(entry)) for entry in gui_data ] # https://pyinstaller.readthedocs.io/en/stable/spec-files.html#adding-data-files
 gui_data_flat = [item for sublist in gui_data_zipped for item in sublist]
@@ -35,12 +35,14 @@ builds = [
         'entry': os.path.join(src_dir, cli_name, '__main__.py'),
         'name': '%s_cli' % project_name,
         'console': '--console',
+        'icon': os.path.join(src_dir, cli_name, 'assets', '%s.ico' % cli_name),
     },
     {
         'entry': os.path.join(src_dir, gui_name, '__main__.py'),
         'name': gui_name,
         'data': gui_data_flat,
         'console': '--noconsole',
+        'icon': os.path.join(src_dir, gui_name, 'assets', '%s.ico' % gui_name),
     }
 ]
 
@@ -53,6 +55,7 @@ for build in builds:
         '--distpath', dist_dir,
         '--clean',
         '--noconfirm',
+        '--icon', build['icon']
     ]
     if 'data' in build: arguments += build['data']
 
