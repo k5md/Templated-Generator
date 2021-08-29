@@ -160,6 +160,7 @@ Generated archives will be placed in **artifacts** directory
 ### Packaging module
 Run the following command to package tempgen module:
 ```sh
+python -m pip install --upgrade build
 python -m build
 ```
 Generated archive and .whl package will be placed in **dist** directory.
