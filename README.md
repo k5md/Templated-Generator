@@ -24,7 +24,9 @@ In GUI application all three will be represented by one input with default value
 42$
 42
 ```
-**Note**: when creating templates in Microsoft Office [disable smart quotes](https://support.microsoft.com/en-us/office/smart-quotes-in-word-702fc92e-b723-4e3d-b2cc-71dedaf2f343) since only straight quotation marks are allowed in template entries
+**Notes**:
+- when creating templates in Microsoft Office [disable smart quotes](https://support.microsoft.com/en-us/office/smart-quotes-in-word-702fc92e-b723-4e3d-b2cc-71dedaf2f343) since only straight quotation marks are allowed in template entries
+- for template entries to be correctly imported and substituted in MS/Open office documents, **whole** template entry string, for instance ```{{{"id": "total", "value": "2500"}}}```, must have consistent formatting
 
 ### Entry object properties
 | property name  | type   | required | description |
