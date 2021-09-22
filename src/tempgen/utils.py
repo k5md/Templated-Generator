@@ -43,7 +43,7 @@ def split_by_key_presense(l, key):
     """
     present, missing = [], []
     for item in l:
-        present.append(item) if property in item else missing.append(item)
+        present.append(item) if key in item else missing.append(item)
     return present, missing
 
 def copy_func(f):
