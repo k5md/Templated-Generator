@@ -10,7 +10,7 @@ __all__ = [
 ]
 
 __title__ = "tempgen"
-__version__ = "1.1.2"
+__version__ = "1.1.3"
 __author__ = "k5md"
 __email__ = "k-5md@yandex.ru"
 __summary__ = "Generate files from templates with template entries replaced"
