@@ -39,8 +39,23 @@ class Parser(AbstractParser):
 
     def collect_paragraphs(self, doc):
         paragraphs = []
-        for p in doc.paragraphs:
+        for section in doc.sections:
+            for p in section.footer.paragraphs:
                 paragraphs.append(p)
+            for table in section.footer.tables:
+                for col in table.columns:
+                    for cell in col.cells:
+                        for p in cell.paragraphs:
+                            paragraphs.append(p)
+            for p in section.header.paragraphs:
+                paragraphs.append(p)
+            for table in section.footer.tables:
+                for col in table.columns:
+                    for cell in col.cells:
+                        for p in cell.paragraphs:
+                            paragraphs.append(p)
+        for p in doc.paragraphs:
+            paragraphs.append(p)
         for table in doc.tables:
             for col in table.columns:
                 for cell in col.cells:
