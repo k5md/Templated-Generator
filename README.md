@@ -1,6 +1,6 @@
 # Templated Generator
 [![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-370/) [![Build Status](https://app.travis-ci.com/k5md/Templated-Generator.svg?token=ZSWp3q2qzbTb4nzaxqWy&branch=master)](https://app.travis-ci.com/k5md/Templated-Generator) 
-[![tempgen.png](https://s9.gifyu.com/images/tempgen.png)](https://gifyu.com/image/GfBa)
+[![tempgen_illustration.png](https://gifyu.com/images/tempgen_illustration.png)](https://gifyu.com/image/S74q3)
 
 Templated generator is a utility, that allows users generate files from templates with embedded template entries that could be edited and automatically transformed, saving time that would be otherwise spend on manually editing generic documents.
 
