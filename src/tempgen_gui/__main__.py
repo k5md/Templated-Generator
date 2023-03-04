@@ -224,7 +224,7 @@ class App(tk.Tk):
         # split fields by presense 'group' property into group_specified and group_not_specified
         group_specified, group_not_specified = split_by_key_presense(fields, 'group')
         # sort fields with no 'group' specified by 'title' property
-        group_not_specified_sorted = sorted(group_not_specified, key=lambda i: i['title'])
+        group_not_specified_sorted = sorted(group_not_specified, key=lambda i: i['title'] if 'title' in i else i['id'])
         # group fields with 'group' specified by 'group' property value
         group_specified_dict = { p: list(g) for p, g in itertools.groupby(group_specified, lambda i: i['group']) }
 
@@ -233,7 +233,7 @@ class App(tk.Tk):
         group_specified_dict_items_sorted = {}
         for group, entries in group_specified_dict.items():
             order_specified, order_not_specified = split_by_key_presense(entries, 'order')
-            order_not_specified = sorted(order_not_specified, key=lambda i: i['title'])
+            order_not_specified = sorted(order_not_specified, key=lambda i: i['title'] if 'title' in i else i['id'])
             order_specified = sorted(order_specified, key=lambda i: int(i['order']))
             group_specified_dict_items_sorted[group] = order_specified + order_not_specified
 
