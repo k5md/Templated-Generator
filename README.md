@@ -51,7 +51,7 @@ Transforms are provided with value (from entry) automatically, additional argume
 | property name  | type   | required | description |
 | :--------  | :----  | :------- | :---------- |
 | fn | string | yes | name of transform function|
-| args | array of strings | no | human-readable title that will be used to represent entry field in tempgen gui|
+| args | array of strings | no | additional arguments, provided after value|
 
 ### Autocomplete object properties
 | property name  | type   | required | description |
